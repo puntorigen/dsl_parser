@@ -1,0 +1,29 @@
+{
+  "name": "dsl_parser",
+  "version": "1.0.0",
+  "description": "Concepto DSL file parser",
+  "main": "parser.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/puntorigen/dsl_parser.git"
+  },
+  "keywords": [
+    "nodejs",
+    "creador",
+    "concepto",
+    "parser"
+  ],
+  "author": "Pablo Schaffner B.",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/puntorigen/dsl_parser/issues"
+  },
+  "homepage": "https://github.com/puntorigen/dsl_parser#readme",
+  "devDependencies": {
+    "cheerio": "^1.0.0-rc.3",
+    "underscore": "^1.9.1"
+  }
+}
