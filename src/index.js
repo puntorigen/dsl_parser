@@ -2,12 +2,12 @@ import helper from 'helper'
 
 export default class dsl_parser {
 
-	constructor(thefile, config) {
+	constructor({ file=this.throwIfMissing('file'), config }={}) {
 		let def_config = {
 			cancelled:false,
 			debug:true
 		};
-		this.file = thefile;
+		this.file = file;
 		this.config = {...config, ...def_config};
 		this.help = new helper();
 		this.$ = null;
@@ -25,7 +25,7 @@ export default class dsl_parser {
 			if (this.config.debug) console.log('fixing accents');
 			data = this.help.fixAccents(data);
 			// parse XML 
-			this.$ = cheerio.load(data, { ignoreWhitespace: false, xmlMode: true, decodeEntities:false });
+			this.$ = cheerio.load(data, { ignoreWhitespace: false, xmlMode:true, decodeEntities:false });
 			// remove cancelled nodes if requested
 			if (!this.config.cancelled) {
 				if (this.config.debug) console.log('removing cancelled nodes from tree');
@@ -36,11 +36,26 @@ export default class dsl_parser {
 		}
 	}
 
+	/**
+	* getParser Gets a reference to the internal parser
+	* @return 	{Object}
+	*/
 	getParser() {
 		return this.$;
 	}
 
-	async getNodes({text,attribute,attribute_value,icon,level,link,recurse=true}={}) {
+	/**
+	* getNodes 	Get all nodes that contain the given arguments (all optional)
+	* @param 	{String}	text			Finds all nodes that contain its text with this value
+	* @param 	{String}	attribute 		Finds all nodes that contain an attribute with this name
+	* @param 	{String}	attribute_value Finds all nodes that contain an attribute with this value
+	* @param 	{String}	icon 			Finds all nodes that contain these icons
+	* @param 	{Int}		level 			Finds all nodes that are on this level
+	* @param 	{String}	link 			Finds all nodes that contains this link
+	* @param 	{Boolean}	recurse 		(default:true) include its children 
+	* @return 	{Array}
+	*/
+	async getNodes({ text,attribute,attribute_value,icon,level,link,recurse=true }={}) {
 		let resp = [], nodes=null, me=this;
 		if (text) {
 			let tmp = text.toString().replace(/ /g,'\\ ');
@@ -81,7 +96,15 @@ export default class dsl_parser {
 		return resp;
 	}
 
-	async getNode({id=this.throwIfMissing('id'), recurse=true, justlevel, dates=true}={}) {
+	/**
+	* getNode 	Get node data for the given id
+	* @param 	{Int}		id			ID of node to request
+	* @param 	{Boolean}	recurse 	(optional, default:true) include its children
+	* @param 	{Boolean}	dates 		(optional, default:true) include parsing creation/modification dates
+	* @param 	{Boolean}	$ 			(optional, default:false) include cheerio reference
+	* @return 	{Array}
+	*/
+	async getNode({ id=this.throwIfMissing('id'), recurse=true, justlevel, dates=true, $=false }={}) {
 		if (this.$===null) throw new Error('call process() first!');
 		let me = this;
 		let resp = { 	level:-1,	text:'',	text_rich:'',	text_node:'',	image:'',
@@ -105,6 +128,8 @@ export default class dsl_parser {
 				resp.valid=false;
 				return false;
 			}
+			// add ref to $
+			if ($) resp.$ = cur;
 			//
 			if (typeof cur.attr('LINK') != 'undefined') resp.link = cur.attr('LINK').split('#').join('');
 			if (typeof cur.attr('POSITION') != 'undefined') resp.position = cur.attr('POSITION');
@@ -199,16 +224,94 @@ export default class dsl_parser {
 		return resp;
 	}
 
-	async getParentNode({id=this.throwIfMissing('id')}={}) {
+	/**
+	* getParentNode returns the parent node of the given node id
+	* @param 	{Int}		id			ID of node to request
+	* @param 	{Boolean}	recurse 	(optional, default:false) include its children
+	* @return 	{Object} 
+	*/
+	async getParentNode({ id=this.throwIfMissing('id'), recurse=false }={}) {
 		if (this.$===null) throw new Error('call process() first!');
 		let padre = this.$(`node[ID=${id}]`).parent('node');
 		let resp = {}, me = this;
 		if (typeof padre.attr('ID') != 'undefined') {
-			resp = await me.getNode({ id:padre.attr('ID'), recurse:false });
+			resp = await me.getNode({ id:padre.attr('ID'), recurse:recurse });
 		}
 		return resp;
 	}
 
+	/**
+	* getParentNodesIDs returns the parent nodes ids of the given node id
+	* @param 	{Int}		id 		node id to query
+	* @param 	{Boolean}	array	get results as array, or as a string
+	* @return 	{String|Array}
+	*/
+	async getParentNodesIDs({ id=this.throwIfMissing('id'), array=false }={}) {
+		let padres = this.$(`node[ID=${id}]`).parents('node');
+		let resp = [], me=this;
+		padres.map(function(i,elem) {
+			let item = me.$(elem);
+			if (typeof item.attr('ID') != 'undefined') {
+				resp.push(item.attr('ID'));
+			}
+		});
+		// delete the last item (central node) and return
+		resp.pop();
+		if (array) {
+			return resp;
+		} else {
+			return resp.join(',');
+		}
+	}
+
+	/**
+	* getChildrenNodesIDs returns the children nodes ids of the given node id
+	* @param 	{Int}		id 		node id to query
+	* @return 	{String}
+	*/
+	async getChildrenNodesIDs({ id=this.throwIfMissing('id'), array=false }={}) {
+		let hijos = this.$(`node[ID=${id}]`).find('node');
+		let resp = [], me=this;
+		hijos.map(function(i,elem) {
+			let item = me.$(elem);
+			if (typeof item.attr('ID') != 'undefined') {
+				resp.push(item.attr('ID'));
+			}
+		});
+		if (array) {
+			return resp;
+		} else {
+			return resp.join(',');
+		}
+	}
+
+	/**
+	* getBrotherNodesIDs returns the brother nodes ids of the given node id
+	* @param 	{Int}		id 		node id to query
+	* @param 	{Boolean}	before 	consider brothers before the queried node (default:true)
+	* @param 	{Boolean}	after 	consider brothers after the queried node (default:true)
+	* @return 	{String}
+	*/
+	async getBrotherNodesIDs({ id=this.throwIfMissing('id'), before=true, after=true }={}) {
+		let me_data = await this.getNode({ id:id, recurse:false, $:true });
+		let resp = [];
+		if (before) {
+			let prev = me_data.$.prev('node'); 
+			while (typeof prev.get(0) != 'undefined') {
+				resp.push(prev.get(0).attribs.ID);
+				prev = prev.prev('node');
+			}
+		}
+		if (after) {
+			let next = me_data.$.next('node'); 
+			while (typeof next.get(0) != 'undefined') {
+				resp.push(next.get(0).attribs.ID);
+				next = next.next('node');
+			}	
+		}
+		// return
+		return resp.join(',');
+	}
 
 	// ********************
 	// private methods
