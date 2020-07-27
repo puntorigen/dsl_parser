@@ -1,6 +1,5 @@
-<p align="center">
-  ES6 DSL File Parser
-</p>
+<h1>ES6 DSL File Parser</h1>
+<small>Part of Creador OPEN Framework</small>
 
 # Features
 ## Key features
