@@ -1,6 +1,6 @@
 {
   "name": "dsl_parser",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Punto Origen - ES6 DSL Parser Class",
   "keywords": [
     "npm-package",

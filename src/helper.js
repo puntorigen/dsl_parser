@@ -7,11 +7,13 @@ export default class helper {
 	}
 
 	title(title) {
-		let _t = '***\ '+title+'\ ***';
-		let _l = this.repeat('*',_t.length);
-		console.log(_l.green);
-		console.log(_t.green);
-		console.log(_l.green);
+		if (this.config.debug) {
+			let _t = '***\ '+title+'\ ***';
+			let _l = this.repeat('*',_t.length);
+			console.log(_l.green);
+			console.log(_t.green);
+			console.log(_l.green);
+		}
 	}
 
 	repeat(string,count) {
@@ -53,6 +55,6 @@ export default class helper {
 			ctext.replace('&#x'+from,table[from]);
 		}
 		return ctext;
-	} 
+	}
 
 }

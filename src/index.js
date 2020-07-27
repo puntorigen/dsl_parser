@@ -15,7 +15,7 @@ export default class dsl_parser {
 
 	async process() {
 		if (this.file!='') {
-			this.help.title('DSL Parser for '+this.file);
+			if (this.config.debug) this.help.title('DSL Parser for '+this.file);
 			if (this.config.debug) console.time('process');
 			let cheerio = require('cheerio'), path = require('path');
 			let fs = require('fs').promises;
@@ -32,7 +32,6 @@ export default class dsl_parser {
 				this.$('icon[BUILTIN*=button_cancel]').parent().remove();
 			}
 			if (this.config.debug) console.timeEnd('process');
-			//if (this.config.debug) console.log('dsl dump',this.$('*').html());
 		}
 	}
 
@@ -321,9 +320,29 @@ export default class dsl_parser {
         throw new Error('Missing '+name+' parameter!');
     }
 
-	showme() {
-		this.help.title('TEST');
-		console.log('debug test',{ thefile:this.file, config:this.config });
+    /**
+	* findVariables finds variables within given text
+	* @param 	{String}	text 			String from where to parse variables
+	* @param 	{Boolean}	symbol 			Wrapper symbol used as variable openning definition. (default:**)
+	* @param 	{Boolean}	symbol_closing 	Wrapper symbol used as variable closing definition. (default:**)
+	* @return 	{String}
+	*/
+    findVariables({ text=this.throwIfMissing('text'),symbol='**',symbol_closing='**', array=false }={}) {
+		const escapseRegExp = function(str) {
+		    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+		}		
+		let extractorPattern = new RegExp(escapseRegExp(symbol) + '(.*?)' + escapseRegExp(symbol_closing), 'g');
+		let resp=[];
+		let nadamas = false;
+		while(!nadamas) {
+			let test = new RegExp(extractorPattern,'gim');
+			let utiles = text.match(test);
+			for (let i in utiles) {
+				resp.push(utiles[i].split(symbol).join('').split(symbol_closing).join(''));
+			}
+			nadamas = true;
+		}
+		return (array)?resp:resp.join(',');
 	}
 
 }

@@ -30,6 +30,12 @@ var myArgs = process.argv.slice(2);
     nodetest2 = await test.getBrotherNodesIDs({ id:'ID_557757424' });
     console.timeEnd('test broterNodes:both');
     console.log('botherNodes test :both',nodetest2);
+
+    let pattern = test.findVariables({ symbol:'{', symbol_closing:'}', text:'Esta es una {cosa} entre {la} frase' });
+    console.log('findVariables result',pattern);
+
+    let pattern2 = test.findVariables({ text:'La **persona**, que va **accion** es muy **tipo**.', array:true });
+    console.log('findVariables2 result',pattern2);    
     /*
     // get all level 2 nodes
     console.time('level 2 nodes');
