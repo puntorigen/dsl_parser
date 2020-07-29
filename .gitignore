@@ -1,6 +1,7 @@
 # IDE & OS specific
 .DS_Store
 .idea
+icon.png
 
 # Logs
 logs
