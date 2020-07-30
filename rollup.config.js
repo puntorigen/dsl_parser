@@ -12,7 +12,7 @@ const config = {
   output: {
     format: 'umd',
     name: 'npmPackageES6DSLparser',
-    sourcemap: 'inline'
+    sourcemap: false
   },
 
   plugins: [
