@@ -2,28 +2,9 @@ var colors_ = require('colors')
 
 export default class helper {
 
-	constructor(config={ debug:true }) {
-		this.config = config;
-	}
-
-	title(title) {
-		if (this.config.debug) {
-			let _t = '***\ '+title+'\ ***';
-			let _l = this.repeat('*',_t.length);
-			console.log(_l.green);
-			console.log(_t.green);
-			console.log(_l.green);
-		}
-	}
-
-	repeat(string,count) {
-		if (count<1) return '';
-		let result='', pattern = string.valueOf();
-		while (count>1) {
-			if (count & 1) result += pattern;
-		    count >>>= 1, pattern += pattern;
-		}
-		return result + pattern;
+	constructor(config) {
+		let def_config = { debug:true }; 
+		this.config = {...def_config,...config};
 	}
 
 	fixAccents(text) {

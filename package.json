@@ -1,21 +1,14 @@
 {
   "name": "dsl_parser",
-  "version": "1.0.1",
-  "description": "Punto Origen - ES6 DSL Parser Class",
+  "version": "1.0.2",
+  "description": "Punto Origen OPEN - ES6 DSL Parser Class",
   "keywords": [
-    "npm-package",
-    "package",
-    "npm",
-    "boilerplate",
-    "rollup",
-    "babel",
-    "flow",
-    "jest",
-    "eslint",
-    "travis",
-    "travis-ci",
-    "coveralls",
-    "renovate"
+    "creador",
+    "puntorigen",
+    "concepto",
+    "dsl",
+    "console",
+    "dsl_parser"
   ],
   "license": "MIT",
   "author": "Pablo Schaffner",
@@ -32,7 +25,7 @@
   "scripts": {
     "clean": "rimraf ./coverage ./lib",
     "dev": "cross-env NODE_ENV=development rollup -c -o lib/index.js",
-    "build": "cross-env NODE_ENV=production rollup -c -o lib/index.js",
+    "build": "cross-env NODE_ENV=production rollup -c -o lib/index.js && npm run docs",
     "test": "cross-env NODE_ENV=test jest",
     "test:watch": "cross-env NODE_ENV=test jest --watch",
     "test:cover": "cross-env NODE_ENV=test jest --coverage",
@@ -40,12 +33,14 @@
     "flow": "flow",
     "flow-typed": "npm run clean && flow-typed install --overwrite || true",
     "lint": "eslint src",
-    "prepublish": "npm run clean && npm run test && npm run flow && npm run lint && npm run build"
+    "prepublish": "npm run clean && npm run test && npm run flow && npm run lint && npm run build",
+    "docs": "jsdoc2md -t README.hbs src/*.js > README.md"
   },
   "dependencies": {
     "babel-runtime": "^6.26.0",
     "cheerio": "^1.0.0-rc.3",
-    "colors": "^1.4.0"
+    "colors": "^1.4.0",
+    "open_console": "github:puntorigen/console"
   },
   "devDependencies": {
     "babel-core": "6.26.0",
@@ -73,7 +68,8 @@
     "rollup-plugin-commonjs": "9.1.0",
     "rollup-plugin-node-resolve": "3.3.0",
     "rollup-plugin-replace": "2.0.0",
-    "rollup-plugin-uglify": "3.0.0"
+    "rollup-plugin-uglify": "3.0.0",
+    "jsdoc-to-markdown": "^6.0.1"
   },
   "scarfSettings": {
     "enabled": false

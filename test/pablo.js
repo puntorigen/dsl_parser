@@ -7,7 +7,7 @@ var myArgs = process.argv.slice(2);
 		thefile = myArgs[0];
 	}
 	// init DSL processing
-	let test = new dsl_parser({ file:thefile, config:{ cancelled:false } });
+	let test = new dsl_parser({ file:thefile, config:{ cancelled:false, debug:true } });
     await test.process();
     // get 1 node
     /*     */

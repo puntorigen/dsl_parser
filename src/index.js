@@ -1,42 +1,54 @@
 import helper from 'helper'
 
+/**
+* dsl_parser: A class for parsing Concepto DSL files, and compile them with the OPEN Framework.<br/><caption>Note: You need to pass all arguments as an Object with keys.</caption>
+* @name 	dsl_parser
+* @module 	dsl_parser
+**/
 export default class dsl_parser {
 
-	constructor({ file=this.throwIfMissing('file'), config }={}) {
+	constructor({ file=this.throwIfMissing('file'), config={} }={}) {
+		let console_ = require('open_console');
 		let def_config = {
 			cancelled:false,
 			debug:true
 		};
 		this.file = file;
-		this.config = {...config, ...def_config};
+		this.config = {...def_config,...config};
 		this.help = new helper();
+		this.debug = new console_({ silent:!this.config.debug });
 		this.$ = null;
 	}
 
 	async process() {
 		if (this.file!='') {
-			if (this.config.debug) this.help.title('DSL Parser for '+this.file);
-			if (this.config.debug) console.time('process');
+			this.debug.setPrefix({ prefix:'dsl_parser', color:'yellow' });
+			this.debug.title({ title:'DSL Parser for '+this.file, color:'green' });
+			this.debug.time({ id:'process' });
+			//if (this.config.debug) console.time('process');
 			let cheerio = require('cheerio'), path = require('path');
 			let fs = require('fs').promises;
 			let fileExists = false, data='';
 			data = await fs.readFile(this.file,'utf-8');
 			// fix accents -> unicode to latin chars
-			if (this.config.debug) console.log('fixing accents');
+			this.debug.outT({ message:'fixing accents' });
+			//if (this.config.debug) console.log('fixing accents');
 			data = this.help.fixAccents(data);
 			// parse XML 
 			this.$ = cheerio.load(data, { ignoreWhitespace: false, xmlMode:true, decodeEntities:false });
 			// remove cancelled nodes if requested
 			if (!this.config.cancelled) {
-				if (this.config.debug) console.log('removing cancelled nodes from tree');
+				this.debug.outT({ message:'removing cancelled nodes from tree' });
+				//if (this.config.debug) console.log('removing cancelled nodes from tree');
 				this.$('icon[BUILTIN*=button_cancel]').parent().remove();
 			}
-			if (this.config.debug) console.timeEnd('process');
+			this.debug.timeEnd({ id:'process' });
+			//if (this.config.debug) console.timeEnd('process');
 		}
 	}
 
 	/**
-	* getParser Gets a reference to the internal parser
+	* Gets a reference to the internal parser
 	* @return 	{Object}
 	*/
 	getParser() {
@@ -44,14 +56,14 @@ export default class dsl_parser {
 	}
 
 	/**
-	* getNodes 	Get all nodes that contain the given arguments (all optional)
-	* @param 	{String}	text			Finds all nodes that contain its text with this value
-	* @param 	{String}	attribute 		Finds all nodes that contain an attribute with this name
-	* @param 	{String}	attribute_value Finds all nodes that contain an attribute with this value
-	* @param 	{String}	icon 			Finds all nodes that contain these icons
-	* @param 	{Int}		level 			Finds all nodes that are on this level
-	* @param 	{String}	link 			Finds all nodes that contains this link
-	* @param 	{Boolean}	recurse 		(default:true) include its children 
+	* Get all nodes that contain the given arguments (all optional)
+	* @param 	{String}	[text]				- Finds all nodes that contain its text with this value
+	* @param 	{String}	[attribute]			- Finds all nodes that contain an attribute with this name
+	* @param 	{String}	[attribute_value]	- Finds all nodes that contain an attribute with this value
+	* @param 	{String}	[icon]				- Finds all nodes that contain these icons
+	* @param 	{Int}		[level] 			- Finds all nodes that are on this level
+	* @param 	{String}	[link] 				- Finds all nodes that contains this link
+	* @param 	{Boolean}	[recurse=true]		- include its children 
 	* @return 	{Array}
 	*/
 	async getNodes({ text,attribute,attribute_value,icon,level,link,recurse=true }={}) {
@@ -96,11 +108,11 @@ export default class dsl_parser {
 	}
 
 	/**
-	* getNode 	Get node data for the given id
-	* @param 	{Int}		id			ID of node to request
-	* @param 	{Boolean}	recurse 	(optional, default:true) include its children
-	* @param 	{Boolean}	dates 		(optional, default:true) include parsing creation/modification dates
-	* @param 	{Boolean}	$ 			(optional, default:false) include cheerio reference
+	* Get node data for the given id
+	* @param 	{Int}		id				- ID of node to request
+	* @param 	{Boolean}	[recurse=true] 	- include its children
+	* @param 	{Boolean}	[dates=true]	- include parsing creation/modification dates
+	* @param 	{Boolean}	[$=false]		- include cheerio reference
 	* @return 	{Array}
 	*/
 	async getNode({ id=this.throwIfMissing('id'), recurse=true, justlevel, dates=true, $=false }={}) {
@@ -224,9 +236,9 @@ export default class dsl_parser {
 	}
 
 	/**
-	* getParentNode returns the parent node of the given node id
-	* @param 	{Int}		id			ID of node to request
-	* @param 	{Boolean}	recurse 	(optional, default:false) include its children
+	* Returns the parent node of the given node id
+	* @param 	{Int}		id				- ID of node to request
+	* @param 	{Boolean}	[recurse=false] - include its children
 	* @return 	{Object} 
 	*/
 	async getParentNode({ id=this.throwIfMissing('id'), recurse=false }={}) {
@@ -240,9 +252,9 @@ export default class dsl_parser {
 	}
 
 	/**
-	* getParentNodesIDs returns the parent nodes ids of the given node id
-	* @param 	{Int}		id 		node id to query
-	* @param 	{Boolean}	array	get results as array, or as a string
+	* Returns the parent nodes ids of the given node id
+	* @param 	{Int}			id 				- node id to query
+	* @param 	{Boolean}		[array=false]	- get results as array, or as a string
 	* @return 	{String|Array}
 	*/
 	async getParentNodesIDs({ id=this.throwIfMissing('id'), array=false }={}) {
@@ -264,9 +276,10 @@ export default class dsl_parser {
 	}
 
 	/**
-	* getChildrenNodesIDs returns the children nodes ids of the given node id
-	* @param 	{Int}		id 		node id to query
-	* @return 	{String}
+	* Returns the children nodes ids of the given node id
+	* @param 	{Int}		id 				- node id to query
+	* @param 	{Boolean}	[array=false]	- get results as array, or as a string
+	* @return 	{String|Array}
 	*/
 	async getChildrenNodesIDs({ id=this.throwIfMissing('id'), array=false }={}) {
 		let hijos = this.$(`node[ID=${id}]`).find('node');
@@ -285,10 +298,10 @@ export default class dsl_parser {
 	}
 
 	/**
-	* getBrotherNodesIDs returns the brother nodes ids of the given node id
-	* @param 	{Int}		id 		node id to query
-	* @param 	{Boolean}	before 	consider brothers before the queried node (default:true)
-	* @param 	{Boolean}	after 	consider brothers after the queried node (default:true)
+	* Returns the brother nodes ids of the given node id
+	* @param 	{Int}		id 				- node id to query
+	* @param 	{Boolean}	[before=true] 	- consider brothers before the queried node
+	* @param 	{Boolean}	[after=true] 	- consider brothers after the queried node
 	* @return 	{String}
 	*/
 	async getBrotherNodesIDs({ id=this.throwIfMissing('id'), before=true, after=true }={}) {
@@ -321,10 +334,10 @@ export default class dsl_parser {
     }
 
     /**
-	* findVariables finds variables within given text
-	* @param 	{String}	text 			String from where to parse variables
-	* @param 	{Boolean}	symbol 			Wrapper symbol used as variable openning definition. (default:**)
-	* @param 	{Boolean}	symbol_closing 	Wrapper symbol used as variable closing definition. (default:**)
+	* Finds variables within given text
+	* @param 	{String}	text 				- String from where to parse variables
+	* @param 	{Boolean}	[symbol=**]			- Wrapper symbol used as variable openning definition.
+	* @param 	{Boolean}	[symbol_closing=**] - Wrapper symbol used as variable closing definition.
 	* @return 	{String}
 	*/
     findVariables({ text=this.throwIfMissing('text'),symbol='**',symbol_closing='**', array=false }={}) {
