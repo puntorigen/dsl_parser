@@ -7,7 +7,7 @@ export default class helper {
 		this.config = {...def_config,...config};
 	}
 
-	fixAccents(text) {
+	fixAccents(text,recover) {
 		let ctext = text;
 		let from = '';
 		const table = {
@@ -32,8 +32,14 @@ export default class helper {
 			'80'	:	'€',
 			'20A7'	:	'Pts'
 		};
-		for (from in table) {
-			ctext.replace('&#x'+from,table[from]);
+		if (recover) {
+			for (from in table) {
+				ctext.replace(table[from],'&#x'+from);
+			}
+		} else {
+			for (from in table) {
+				ctext.replace('&#x'+from,table[from]);
+			}
 		}
 		return ctext;
 	}

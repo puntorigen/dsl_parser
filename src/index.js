@@ -325,6 +325,17 @@ export default class dsl_parser {
 		return resp.join(',');
 	}
 
+	async createGitVersion() {
+		// 1) get copy of current DSL content into memory (for restoring after returning)
+		// 2) get all nodes
+		let nodes = this.$(`node`);
+		// 3) replace all attributes CREATED with fixed value
+		// 4) replace all attributes MODIFIED with fixed value
+		// 5) erase all attributes VSHIFT
+		// 6) erase all attributes HGAP
+		// 7) transform all latin accents into original-unicodes (fixAccents(text,recover=true) (helper class))
+	}
+
 	// ********************
 	// private methods
 	// ********************
