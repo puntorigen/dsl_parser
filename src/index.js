@@ -325,15 +325,33 @@ export default class dsl_parser {
 		return resp.join(',');
 	}
 
+	/**
+	* Returns a modified version of the current loaded DSL, ready to be push to a version control (like github)
+	* @return 	{String} 	- Modified DSL source ready to be saved and pushed to a version control
+	*/
 	async createGitVersion() {
 		// 1) get copy of current DSL content into memory (for restoring after returning)
+		let copy = this.$.html(), me = this;
 		// 2) get all nodes
 		let nodes = this.$(`node`);
-		// 3) replace all attributes CREATED with fixed value
-		// 4) replace all attributes MODIFIED with fixed value
-		// 5) erase all attributes VSHIFT
-		// 6) erase all attributes HGAP
+		// 
+		nodes.each(function(i,elem) {
+			// 3) replace all attributes CREATED with fixed value
+			me.$(elem).attr("CREATED", "1552681669876");
+			// 4) replace all attributes MODIFIED with fixed value
+			me.$(elem).attr("MODIFIED", "1552681669876");
+			// 5) erase all attributes VSHIFT and HGAP
+			me.$(elem).removeAttr("VSHIFT");
+			// 6) erase all attributes HGAP
+			me.$(elem).removeAttr("HGAP");
+		});
 		// 7) transform all latin accents into original-unicodes (fixAccents(text,recover=true) (helper class))
+		let resp = this.$.html();
+		resp = this.help.fixAccents(resp,true);
+		// recover original tags to current parser $.
+		this.$ = this.$.load(copy, { ignoreWhitespace: false, xmlMode:true, decodeEntities:false });
+		// return
+		return resp;
 	}
 
 	// ********************

@@ -12,6 +12,7 @@ dsl_parser: A class for parsing Concepto DSL files, and compile them with the OP
     * [.getParentNodesIDs(id, [array])](#module_dsl_parser+getParentNodesIDs) ⇒ <code>String</code> \| <code>Array</code>
     * [.getChildrenNodesIDs(id, [array])](#module_dsl_parser+getChildrenNodesIDs) ⇒ <code>String</code> \| <code>Array</code>
     * [.getBrotherNodesIDs(id, [before], [after])](#module_dsl_parser+getBrotherNodesIDs) ⇒ <code>String</code>
+    * [.createGitVersion()](#module_dsl_parser+createGitVersion) ⇒ <code>String</code>
     * [.findVariables(text, [symbol], [symbol_closing])](#module_dsl_parser+findVariables) ⇒ <code>String</code>
 
 <a name="module_dsl_parser+getParser"></a>
@@ -100,6 +101,13 @@ Returns the brother nodes ids of the given node id
 | [before] | <code>Boolean</code> | <code>true</code> | consider brothers before the queried node |
 | [after] | <code>Boolean</code> | <code>true</code> | consider brothers after the queried node |
 
+<a name="module_dsl_parser+createGitVersion"></a>
+
+### dsl_parser.createGitVersion() ⇒ <code>String</code>
+Returns a modified version of the current loaded DSL, ready to be push to a version control (like github)
+
+**Kind**: instance method of [<code>dsl\_parser</code>](#module_dsl_parser)  
+**Returns**: <code>String</code> - - Modified DSL source ready to be saved and pushed to a version control  
 <a name="module_dsl_parser+findVariables"></a>
 
 ### dsl_parser.findVariables(text, [symbol], [symbol_closing]) ⇒ <code>String</code>

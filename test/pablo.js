@@ -9,6 +9,11 @@ var myArgs = process.argv.slice(2);
 	// init DSL processing
 	let test = new dsl_parser({ file:thefile, config:{ cancelled:false, debug:true } });
     await test.process();
+    console.time('create git dsl');
+    let gitdsl = await test.createGitVersion();
+    console.timeEnd('create git dsl');
+    //console.log('new git dsl',gitdsl);
+
     // get 1 node
     /*     */
     console.time('test singlenode');
@@ -36,6 +41,7 @@ var myArgs = process.argv.slice(2);
 
     let pattern2 = test.findVariables({ text:'La **persona**, que va **accion** es muy **tipo**.', array:true });
     console.log('findVariables2 result',pattern2);    
+    
     /*
     // get all level 2 nodes
     console.time('level 2 nodes');
