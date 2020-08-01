@@ -1,7 +1,7 @@
 import helper from 'helper'
 
 /**
-* dsl_parser: A class for parsing Concepto DSL files, and compile them with the OPEN Framework.<br/><caption>Note: You need to pass all arguments as an Object with keys.</caption>
+* dsl_parser: A class for parsing Concepto DSL files, and compile them with the OPEN Framework.
 * @name 	dsl_parser
 * @module 	dsl_parser
 **/
