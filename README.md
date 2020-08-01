@@ -6,8 +6,8 @@ dsl_parser: A class for parsing Concepto DSL files, and compile them with the OP
 
 * [dsl_parser](#module_dsl_parser)
     * [.getParser()](#module_dsl_parser+getParser) ⇒ <code>Object</code>
-    * [.getNodes([text], [attribute], [attribute_value], [icon], [level], [link], [recurse])](#module_dsl_parser+getNodes) ⇒ <code>Array</code>
-    * [.getNode(id, [recurse], [dates], [$])](#module_dsl_parser+getNode) ⇒ <code>Array</code>
+    * [.getNodes([text], [attribute], [attribute_value], [icon], [level], [link], [recurse], [nodes_raw])](#module_dsl_parser+getNodes) ⇒ <code>Array</code>
+    * [.getNode(id, [recurse], [dates], [$], [nodes_raw])](#module_dsl_parser+getNode) ⇒ <code>Array</code>
     * [.getParentNode(id, [recurse])](#module_dsl_parser+getParentNode) ⇒ <code>Object</code>
     * [.getParentNodesIDs(id, [array])](#module_dsl_parser+getParentNodesIDs) ⇒ <code>String</code> \| <code>Array</code>
     * [.getChildrenNodesIDs(id, [array])](#module_dsl_parser+getChildrenNodesIDs) ⇒ <code>String</code> \| <code>Array</code>
@@ -23,7 +23,7 @@ Gets a reference to the internal parser
 **Kind**: instance method of [<code>dsl\_parser</code>](#module_dsl_parser)  
 <a name="module_dsl_parser+getNodes"></a>
 
-### dsl_parser.getNodes([text], [attribute], [attribute_value], [icon], [level], [link], [recurse]) ⇒ <code>Array</code>
+### dsl_parser.getNodes([text], [attribute], [attribute_value], [icon], [level], [link], [recurse], [nodes_raw]) ⇒ <code>Array</code>
 Get all nodes that contain the given arguments (all optional)
 
 **Kind**: instance method of [<code>dsl\_parser</code>](#module_dsl_parser)  
@@ -37,10 +37,11 @@ Get all nodes that contain the given arguments (all optional)
 | [level] | <code>Int</code> |  | Finds all nodes that are on this level |
 | [link] | <code>String</code> |  | Finds all nodes that contains this link |
 | [recurse] | <code>Boolean</code> | <code>true</code> | include its children |
+| [nodes_raw] | <code>Boolean</code> | <code>false</code> | if recurse is false and this is true, includes key nodes_raw (children nodes) in result with a cheerio reference instead of processing them. |
 
 <a name="module_dsl_parser+getNode"></a>
 
-### dsl_parser.getNode(id, [recurse], [dates], [$]) ⇒ <code>Array</code>
+### dsl_parser.getNode(id, [recurse], [dates], [$], [nodes_raw]) ⇒ <code>Array</code>
 Get node data for the given id
 
 **Kind**: instance method of [<code>dsl\_parser</code>](#module_dsl_parser)  
@@ -51,6 +52,7 @@ Get node data for the given id
 | [recurse] | <code>Boolean</code> | <code>true</code> | include its children |
 | [dates] | <code>Boolean</code> | <code>true</code> | include parsing creation/modification dates |
 | [$] | <code>Boolean</code> | <code>false</code> | include cheerio reference |
+| [nodes_raw] | <code>Boolean</code> | <code>false</code> | if recurse is false and this is true, includes key nodes_raw (children nodes) in result with a cheerio reference instead of processing them. |
 
 <a name="module_dsl_parser+getParentNode"></a>
 
@@ -107,7 +109,7 @@ Returns the brother nodes ids of the given node id
 Returns a modified version of the current loaded DSL, ready to be push to a version control (like github)
 
 **Kind**: instance method of [<code>dsl\_parser</code>](#module_dsl_parser)  
-**Returns**: <code>String</code> - - Modified DSL source ready to be saved and pushed to a version control  
+**Returns**: <code>String</code> - Modified DSL source ready to be saved and pushed to a version control  
 <a name="module_dsl_parser+findVariables"></a>
 
 ### dsl_parser.findVariables(text, [symbol], [symbol_closing]) ⇒ <code>String</code>

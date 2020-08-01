@@ -64,9 +64,10 @@ export default class dsl_parser {
 	* @param 	{Int}		[level] 			- Finds all nodes that are on this level
 	* @param 	{String}	[link] 				- Finds all nodes that contains this link
 	* @param 	{Boolean}	[recurse=true]		- include its children 
+	* @param 	{Boolean}	[nodes_raw=false]	- if recurse is false and this is true, includes key nodes_raw (children nodes) in result with a cheerio reference instead of processing them.
 	* @return 	{Array}
 	*/
-	async getNodes({ text,attribute,attribute_value,icon,level,link,recurse=true }={}) {
+	async getNodes({ text,attribute,attribute_value,icon,level,link,recurse=true,nodes_raw=false }={}) {
 		let resp = [], nodes=null, me=this;
 		if (text) {
 			let tmp = text.toString().replace(/ /g,'\\ ');
@@ -99,7 +100,7 @@ export default class dsl_parser {
 			nodes.map(async function(i,elem) {
 				let cur = me.$(elem);
 				if (typeof cur.attr('ID') != 'undefined') {
-					let tmp = await me.getNode({ id:cur.attr('ID'), recurse:recurse });
+					let tmp = await me.getNode({ id:cur.attr('ID'), recurse:recurse, nodes_raw:nodes_raw });
 					resp.push(tmp);
 				}
 			});
@@ -113,9 +114,10 @@ export default class dsl_parser {
 	* @param 	{Boolean}	[recurse=true] 	- include its children
 	* @param 	{Boolean}	[dates=true]	- include parsing creation/modification dates
 	* @param 	{Boolean}	[$=false]		- include cheerio reference
+	* @param 	{Boolean}	[nodes_raw=false]	- if recurse is false and this is true, includes key nodes_raw (children nodes) in result with a cheerio reference instead of processing them.
 	* @return 	{Array}
 	*/
-	async getNode({ id=this.throwIfMissing('id'), recurse=true, justlevel, dates=true, $=false }={}) {
+	async getNode({ id=this.throwIfMissing('id'), recurse=true, justlevel, dates=true, $=false, nodes_raw=false }={}) {
 		if (this.$===null) throw new Error('call process() first!');
 		let me = this;
 		let resp = { 	level:-1,	text:'',	text_rich:'',	text_node:'',	image:'',
@@ -225,6 +227,8 @@ export default class dsl_parser {
 						resp.nodes.push(hijo);
 					}
 				});
+			} else if (nodes_raw==true) {
+				resp.nodes_raw = cur.find('node');
 			}
 			// break loop
 			return false;
@@ -327,7 +331,7 @@ export default class dsl_parser {
 
 	/**
 	* Returns a modified version of the current loaded DSL, ready to be push to a version control (like github)
-	* @return 	{String} 	- Modified DSL source ready to be saved and pushed to a version control
+	* @return 	{String} 	Modified DSL source ready to be saved and pushed to a version control
 	*/
 	async createGitVersion() {
 		// 1) get copy of current DSL content into memory (for restoring after returning)
