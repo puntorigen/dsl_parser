@@ -369,8 +369,9 @@ export default class dsl_parser {
     /**
 	* Finds variables within given text
 	* @param 	{String}	text 				- String from where to parse variables
-	* @param 	{Boolean}	[symbol=**]			- Wrapper symbol used as variable openning definition.
-	* @param 	{Boolean}	[symbol_closing=**] - Wrapper symbol used as variable closing definition.
+	* @param 	{String}	[symbol=**]			- Wrapper symbol used as variable openning definition.
+	* @param 	{String}	[symbol_closing=**] - Wrapper symbol used as variable closing definition.
+	* @param 	{Boolean}	[array=false]		- get results as array, or as a string
 	* @return 	{String}
 	*/
     findVariables({ text=this.throwIfMissing('text'),symbol='**',symbol_closing='**', array=false }={}) {
@@ -389,6 +390,24 @@ export default class dsl_parser {
 			nadamas = true;
 		}
 		return (array)?resp:resp.join(',');
+	}
+
+	/**
+	* Finds and transform variables wrapping/handlebars symbols given a 'from' symbol object and a 'to' symbol object within the given text
+	* @param 	{String}	text 				- String from where to parse variables
+	* @param 	{Object}	from				- Object to identify source variables symbols (keys: open and close)
+	* @param 	{Object}	to 					- Object to identify target variables symbols (keys: open and close)
+	* @return 	{String}
+	*/
+    replaceVarsSymbol({ text=this.throwIfMissing('text'),from={ open:'**', close:'**'},to={ open:'**', close:'**'} }={}) {
+    	let source = this.findVariables({ text, symbol:from.open, symbol_closing:from.close, array:true });
+    	let resp = text, tmp={};
+    	for (let item of source) {
+    		tmp.from = from.open+item+from.close;
+    		tmp.to = to.open+item+to.close;
+    		resp = resp.replace(tmp.from,tmp.to);
+    	}
+    	return resp;
 	}
 
 }

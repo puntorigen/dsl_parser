@@ -14,7 +14,8 @@ dsl_parser: A class for parsing Concepto DSL files, and compile them with the OP
     * [.getChildrenNodesIDs(id, [array])](#module_dsl_parser+getChildrenNodesIDs) ⇒ <code>String</code> \| <code>Array</code>
     * [.getBrotherNodesIDs(id, [before], [after])](#module_dsl_parser+getBrotherNodesIDs) ⇒ <code>String</code>
     * [.createGitVersion()](#module_dsl_parser+createGitVersion) ⇒ <code>String</code>
-    * [.findVariables(text, [symbol], [symbol_closing])](#module_dsl_parser+findVariables) ⇒ <code>String</code>
+    * [.findVariables(text, [symbol], [symbol_closing], [array])](#module_dsl_parser+findVariables) ⇒ <code>String</code>
+    * [.replaceVarsSymbol(text, from, to)](#module_dsl_parser+replaceVarsSymbol) ⇒ <code>String</code>
 
 <a name="module_dsl_parser+getParser"></a>
 
@@ -113,7 +114,7 @@ Returns a modified version of the current loaded DSL, ready to be push to a vers
 **Returns**: <code>String</code> - Modified DSL source ready to be saved and pushed to a version control  
 <a name="module_dsl_parser+findVariables"></a>
 
-### dsl_parser.findVariables(text, [symbol], [symbol_closing]) ⇒ <code>String</code>
+### dsl_parser.findVariables(text, [symbol], [symbol_closing], [array]) ⇒ <code>String</code>
 Finds variables within given text
 
 **Kind**: instance method of [<code>dsl\_parser</code>](#module_dsl_parser)  
@@ -121,8 +122,22 @@ Finds variables within given text
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
 | text | <code>String</code> |  | String from where to parse variables |
-| [symbol] | <code>Boolean</code> | <code>**</code> | Wrapper symbol used as variable openning definition. |
-| [symbol_closing] | <code>Boolean</code> | <code>**</code> | Wrapper symbol used as variable closing definition. |
+| [symbol] | <code>String</code> | <code>**</code> | Wrapper symbol used as variable openning definition. |
+| [symbol_closing] | <code>String</code> | <code>**</code> | Wrapper symbol used as variable closing definition. |
+| [array] | <code>Boolean</code> | <code>false</code> | get results as array, or as a string |
+
+<a name="module_dsl_parser+replaceVarsSymbol"></a>
+
+### dsl_parser.replaceVarsSymbol(text, from, to) ⇒ <code>String</code>
+Finds and transform variables wrapping/handlebars symbols given a 'from' symbol object and a 'to' symbol object within the given text
+
+**Kind**: instance method of [<code>dsl\_parser</code>](#module_dsl_parser)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| text | <code>String</code> | String from where to parse variables |
+| from | <code>Object</code> | Object to identify source variables symbols (keys: open and close) |
+| to | <code>Object</code> | Object to identify target variables symbols (keys: open and close) |
 
 
 * * *
