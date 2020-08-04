@@ -6,6 +6,7 @@ dsl_parser: A class for parsing Concepto DSL files, and compile them with the OP
 
 
 * [dsl_parser](#module_dsl_parser)
+    * [.process()](#module_dsl_parser+process)
     * [.getParser()](#module_dsl_parser+getParser) ⇒ <code>Object</code>
     * [.getNodes([text], [attribute], [attribute_value], [icon], [level], [link], [recurse], [nodes_raw])](#module_dsl_parser+getNodes) ⇒ <code>Array</code>
     * [.getNode(id, [recurse], [dates], [$], [nodes_raw])](#module_dsl_parser+getNode) ⇒ <code>Array</code>
@@ -17,6 +18,12 @@ dsl_parser: A class for parsing Concepto DSL files, and compile them with the OP
     * [.findVariables(text, [symbol], [symbol_closing], [array])](#module_dsl_parser+findVariables) ⇒ <code>String</code>
     * [.replaceVarsSymbol(text, from, to)](#module_dsl_parser+replaceVarsSymbol) ⇒ <code>String</code>
 
+<a name="module_dsl_parser+process"></a>
+
+### dsl_parser.process()
+Executes initial processing for parser
+
+**Kind**: instance method of [<code>dsl\_parser</code>](#module_dsl_parser)  
 <a name="module_dsl_parser+getParser"></a>
 
 ### dsl_parser.getParser() ⇒ <code>Object</code>

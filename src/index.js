@@ -20,6 +20,9 @@ export default class dsl_parser {
 		this.$ = null;
 	}
 
+	/**
+	* Executes initial processing for parser
+	*/
 	async process() {
 		if (this.file!='') {
 			this.debug.setPrefix({ prefix:'dsl_parser', color:'yellow' });
@@ -120,7 +123,7 @@ export default class dsl_parser {
 	async getNode({ id=this.throwIfMissing('id'), recurse=true, justlevel, dates=true, $=false, nodes_raw=false }={}) {
 		if (this.$===null) throw new Error('call process() first!');
 		let me = this;
-		let resp = { 	level:-1,	text:'',	text_rich:'',	text_node:'',	image:'',
+		let resp = { 	level:-1,	text:'',	text_rich:'',	text_note:'',	image:'',
 						cloud:
 							{ used:false, bgcolor:'' },	
 						arrows:[], 	nodes:[],
@@ -198,7 +201,7 @@ export default class dsl_parser {
 			});
 			// get notes on node if any
 			cur.find('node[ID='+resp.id+'] > richcontent[TYPE=NOTE] body').map(function(a,a_elem) {
-				resp.text_node = me.$(a_elem).text();
+				resp.text_note = me.$(a_elem).text();
 			});
 			// get defined arrows on node if any
 			cur.find('node[ID='+resp.id+'] > arrowlink').map(function(a,a_elem) {
