@@ -5,6 +5,45 @@ import helper from 'helper'
 * @name 	dsl_parser
 * @module 	dsl_parser
 **/
+
+/**
+ * A node object representation of a DSL node.
+ * @typedef {Object} NodeDSL
+ * @property {number} id - Node unique ID.
+ * @property {number} level - Indicates the depth level from the center of the dsl map.
+ * @property {string} text - Indicates the text defined in the node itself.
+ * @property {string} text_rich - Indicates the html defined in the node itself.
+ * @property {string} text_note - Indicates the text/html defined in the notes view of the node (if any).
+ * @property {string} image - Image link defined as an image within the node.
+ * @property {Object} cloud - Cloud information of the node.
+ * @property {string} cloud.bgcolor - Background color of cloud.
+ * @property {boolean} cloud.used - True if cloud is used, false otherwise. 
+ * @property {Arrow[]} arrows - Visual connections of this node with other nodes {@link #module_concepto..Arrow}.
+ * @property {NodeDSL[]} nodes - Children nodes of current node.
+ * @property {Object} font - Define font, size and styles of node texts.
+ * @property {Object} font.face - Font face type used on node.
+ * @property {Object} font.size - Font size used on node.
+ * @property {Object} font.bold - True if node text is in bold.
+ * @property {Object} font.italic - True if node text is in italics.
+ * @property {string} style - Style applied to the node.
+ * @property {string} color - Text color of node.
+ * @property {string} bgcolor - Background color of node.
+ * @property {string} link - Link defined on node.
+ * @property {string} position - Position in relation of central node (left,right).
+ * @property {Object[]} attributes - Array of objects with each attribute (key is attribute name, value is attribute value).
+ * @property {string[]} icons - Array with icon names used in the node.
+ * @property {date} date_modified - Date of node when it was last modified.
+ * @property {date} date_created - Date of node when it was created.
+ */
+
+ /**
+ * Arrow object definition, for connections to other nodes within a DSL.
+ * @typedef {Object} Arrow
+ * @property {string} target - Target node ID of connection.
+ * @property {string} color - Color of visual connection.
+ * @property {string} style - Graphical representation type of link (source-to-target, target-to-source, both-ways). 
+*/
+
 export default class dsl_parser {
 
 	constructor({ file=this.throwIfMissing('file'), config={} }={}) {
@@ -68,7 +107,7 @@ export default class dsl_parser {
 	* @param 	{String}	[link] 				- Finds all nodes that contains this link
 	* @param 	{Boolean}	[recurse=true]		- include its children 
 	* @param 	{Boolean}	[nodes_raw=false]	- if recurse is false and this is true, includes key nodes_raw (children nodes) in result with a cheerio reference instead of processing them.
-	* @return 	{Array}
+	* @return 	{NodeDSL[]}
 	*/
 	async getNodes({ text,attribute,attribute_value,icon,level,link,recurse=true,nodes_raw=false }={}) {
 		let resp = [], nodes=null, me=this;
@@ -118,7 +157,7 @@ export default class dsl_parser {
 	* @param 	{Boolean}	[dates=true]	- include parsing creation/modification dates
 	* @param 	{Boolean}	[$=false]		- include cheerio reference
 	* @param 	{Boolean}	[nodes_raw=false]	- if recurse is false and this is true, includes key nodes_raw (children nodes) in result with a cheerio reference instead of processing them.
-	* @return 	{Array}
+	* @return 	{NodeDSL[]}
 	*/
 	async getNode({ id=this.throwIfMissing('id'), recurse=true, justlevel, dates=true, $=false, nodes_raw=false }={}) {
 		if (this.$===null) throw new Error('call process() first!');
@@ -246,7 +285,7 @@ export default class dsl_parser {
 	* Returns the parent node of the given node id
 	* @param 	{Int}		id				- ID of node to request
 	* @param 	{Boolean}	[recurse=false] - include its children
-	* @return 	{Object} 
+	* @return 	{NodeDSL} 
 	*/
 	async getParentNode({ id=this.throwIfMissing('id'), recurse=false }={}) {
 		if (this.$===null) throw new Error('call process() first!');
