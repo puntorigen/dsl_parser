@@ -169,7 +169,7 @@ A node object representation of a DSL node.
 | cloud | <code>Object</code> | Cloud information of the node. |
 | cloud.bgcolor | <code>string</code> | Background color of cloud. |
 | cloud.used | <code>boolean</code> | True if cloud is used, false otherwise. |
-| arrows | <code>Array.&lt;Arrow&gt;</code> | Visual connections of this node with other nodes [#module_concepto..Arrow](#module_concepto..Arrow). |
+| arrows | <code>Array.&lt;Arrow&gt;</code> | Visual connections of this node with other nodes [#module_dsl_parser..Arrow](#module_dsl_parser..Arrow). |
 | nodes | <code>Array.&lt;NodeDSL&gt;</code> | Children nodes of current node. |
 | font | <code>Object</code> | Define font, size and styles of node texts. |
 | font.face | <code>Object</code> | Font face type used on node. |

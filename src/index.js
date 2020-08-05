@@ -18,7 +18,7 @@ import helper from 'helper'
  * @property {Object} cloud - Cloud information of the node.
  * @property {string} cloud.bgcolor - Background color of cloud.
  * @property {boolean} cloud.used - True if cloud is used, false otherwise. 
- * @property {Arrow[]} arrows - Visual connections of this node with other nodes {@link #module_concepto..Arrow}.
+ * @property {Arrow[]} arrows - Visual connections of this node with other nodes {@link #module_dsl_parser..Arrow}.
  * @property {NodeDSL[]} nodes - Children nodes of current node.
  * @property {Object} font - Define font, size and styles of node texts.
  * @property {Object} font.face - Font face type used on node.
