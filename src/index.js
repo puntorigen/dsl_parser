@@ -224,7 +224,7 @@ export default class dsl_parser {
 						date_created: new Date(),
 						valid: true
 					};
-		let nodes = me.$('node[ID='+id+']').each(async function(i,elem) {
+		let nodes = await me.$('node[ID='+id+']').each(async function(i,elem) {
 			let cur = me.$(elem), pa_ac = -1;
 			resp.id = cur.attr('ID');
 			resp.level = cur.parents('node').length+1;
@@ -311,16 +311,30 @@ export default class dsl_parser {
 			});
 			// get children nodes .. (using myself for each child)
 			if (recurse==true) {
-				cur.find('node').map(async function(a,a_elem) {
+				await cur.find('node').map(async function(a,a_elem) {
 					let _nodo = me.$(a_elem);
 					let hijo = await me.getNode({ id:_nodo.attr('ID'), recurse:recurse, justlevel:resp.level+1 });
 					if (hijo.valid) {
 						delete hijo.valid;
 						resp.nodes.push(hijo);
 					}
-				});
+				}.bind(this));
 			} else if (nodes_raw==true) {
 				resp.nodes_raw = cur.find('node');
+				/* */
+				resp.getNodes = async function() {
+					// this.me and this.cur
+					let resp=[];
+					await this.cur.find('node').map(async function(a,a_elem) {
+						let _nodo = this.me.$(a_elem);
+						let hijo = await this.me.getNode({ id:_nodo.attr('ID'), justlevel:this.level+1, recurse:false, nodes_raw:true });
+						if (hijo.valid) {
+							delete hijo.valid;
+							resp.push(hijo);
+						}
+					}.bind(this));
+					return resp;
+				}.bind({me,cur,level:resp.level});
 			}
 			// break loop
 			return false;
