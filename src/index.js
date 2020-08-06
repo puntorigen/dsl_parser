@@ -129,7 +129,7 @@ export default class dsl_parser {
 			let tmp = icon.replace(/ /g,'\\ ');
 			nodes = this.$(`icon[BUILTIN*=${tmp}]`).parent('node');
 			fmatch = 'icon';
-		} else if (level && (level.indexOf('<')==-1 && level.indexOf('>')==-1)) {
+		} else if (level && !isNaN(level)) {
 			nodes = this.$(`node`).filter(function(i,elem) {
 				let padres = -1;
 				try {
@@ -179,7 +179,11 @@ export default class dsl_parser {
 					}
 					// level
 					if (all_met && level && fmatch!='level') {
-						all_met = numberInCondition(tmp.level,level);
+						if (isNaN(level)) {
+							all_met = numberInCondition(tmp.level,level);
+						} else {
+							if (tmp.level!=level) all_met=false;
+						}
 					}
 					//
 					if (all_met==true) resp.push(tmp);
@@ -503,8 +507,8 @@ export default class dsl_parser {
 //private methods
 //
 //returns true if num meets the conditions listed on test (false otherwise)
-function numberInCondition(num,test) {	
-	let resp=true;
+function numberInCondition(num,test2) {	
+	let resp=true, test=(isNaN(test2))?test2:test2.toString();
 	if (test.indexOf('>')!=-1 || test.indexOf('<')!=-1) {
 		// 'and/all' (>2,<7)
 		for (let i of test.split(',')) {

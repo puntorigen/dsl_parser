@@ -16,7 +16,7 @@ var myArgs = process.argv.slice(2);
 
     // get all level 2 nodes
     console.time('get all config');
-    let level2 = await test.getNodes({ text:'config', icon:'desktop_new', level:'2', recurse:true, nodes_raw:true });
+    let level2 = await test.getNodes({ text:'config', icon:'desktop_new', level:2, recurse:true, nodes_raw:true });
     console.timeEnd('get all config');
     
     // get 1 node
