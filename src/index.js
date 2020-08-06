@@ -106,24 +106,30 @@ export default class dsl_parser {
 	* @param 	{Int}		[level] 			- Finds all nodes that are on this level
 	* @param 	{String}	[link] 				- Finds all nodes that contains this link
 	* @param 	{Boolean}	[recurse=true]		- include its children 
-	* @param 	{Boolean}	[nodes_raw=false]	- if recurse is false and this is true, includes key nodes_raw (children nodes) in result with a cheerio reference instead of processing them.
+	* @param 	{Boolean}	[nodes_raw=false]	- if this is true, includes key nodes_raw (children nodes) in result with a cheerio reference instead of processing them.
 	* @return 	{NodeDSL[]}
 	*/
 	async getNodes({ text,attribute,attribute_value,icon,level,link,recurse=true,nodes_raw=false }={}) {
-		let resp = [], nodes=null, me=this;
+		let resp = [], nodes=null, me=this, fmatch='';
+		if (nodes_raw==true) recurse=false;
+		// match first param that is defined
 		if (text) {
 			let tmp = text.toString().replace(/ /g,'\\ ');
-			nodes = this.$(`node[text*=${tmp}]`);
+			nodes = this.$(`node[TEXT*=${tmp}]`);
+			fmatch = 'text';
 		} else if (attribute) {
 			let tmp = attribute.replace(/ /g,'\\ ');
-			nodes = this.$(`attribute[name*=${tmp}]`).parent('node');
+			nodes = this.$(`attribute[NAME*=${tmp}]`).parent('node');
+			fmatch = 'attribute';
 		} else if (attribute_value) {
 			let tmp = attribute_value.replace(/ /g,'\\ ');
-			nodes = this.$(`attribute[value*=${tmp}]`).parent('node');
+			nodes = this.$(`attribute[VALUE*=${tmp}]`).parent('node');
+			fmatch = 'attribute_value';
 		} else if (icon) {
 			let tmp = icon.replace(/ /g,'\\ ');
-			nodes = this.$(`icon[builtin*=${tmp}]`).parent('node');
-		} else if (level) {
+			nodes = this.$(`icon[BUILTIN*=${tmp}]`).parent('node');
+			fmatch = 'icon';
+		} else if (level && (level.indexOf('<')==-1 && level.indexOf('>')==-1)) {
 			nodes = this.$(`node`).filter(function(i,elem) {
 				let padres = -1;
 				try {
@@ -131,22 +137,62 @@ export default class dsl_parser {
 				} catch(ee) {}
 				return padres===level;
 			});
+			fmatch = 'level';
 		} else if (link) {
 			let tmp = link.replace(/ /g,'\\ ');
-			nodes = this.$(`node[link*=${tmp}]`);
+			nodes = this.$(`node[LINK*=${tmp}]`);
+			fmatch = 'level';
 		} else {
 			nodes = this.$(`node`);
+			fmatch = 'none';
 		}
 		// iterate nodes and build resp array
 		if (nodes!=null) {
-			nodes.map(async function(i,elem) {
+			await nodes.map(async function(i,elem) {
 				let cur = me.$(elem);
 				if (typeof cur.attr('ID') != 'undefined') {
 					let tmp = await me.getNode({ id:cur.attr('ID'), recurse:recurse, nodes_raw:nodes_raw });
-					resp.push(tmp);
+					// re-filter to see if all params defined match in this node (@TODO make more efficient doing before calling getNode; needs to be re-thinked)
+					let all_met = true;
+					// text
+					if (all_met && text && fmatch!='text' && tmp.text.indexOf(text)==-1) all_met=false;
+					// attribute
+					if (all_met && attribute && fmatch!='attribute') {
+						all_met = false;
+						tmp.attributes.map(function(x){ 
+							if(Object.keys(x)[0]==attribute) all_met=true; 
+						});
+					}
+					// attribute_value
+					if (all_met && attribute_value && fmatch!='attribute_value') {
+						all_met = false;
+						tmp.attribute_value.map(function(x){ 
+							if(Object.keys(x)[1]==attribute_value) all_met=true; 
+						});
+					}
+					// icon
+					if (all_met && icon && fmatch!='icon') {
+						all_met = false;
+						tmp.icons.map(function(x) {
+							if (x==icon) all_met=true;
+						});
+					}
+					// level
+					if (all_met && level && fmatch!='level') {
+						all_met = numberInCondition(tmp.level,level);
+					}
+					//
+					if (all_met==true) resp.push(tmp);
+					/*if (recurse==true && all_met==true) {
+						let tmp2 = await me.getNode({ id:cur.attr('ID'), recurse:recurse, nodes_raw:nodes_raw });
+						resp.push(tmp2);
+					} else if (all_met) {
+						resp.push(tmp);
+					}*/
 				}
 			});
 		}
+		console.log('resp',resp);
 		return resp;
 	}
 
@@ -452,4 +498,37 @@ export default class dsl_parser {
     	return resp;
 	}
 
+}
+
+//private methods
+//
+//returns true if num meets the conditions listed on test (false otherwise)
+function numberInCondition(num,test) {	
+	let resp=true;
+	if (test.indexOf('>')!=-1 || test.indexOf('<')!=-1) {
+		// 'and/all' (>2,<7)
+		for (let i of test.split(',')) {
+			if (i.substring(0,1)=='>') {
+				if (num<=parseInt(i.replace('>',''))) {
+					resp=false;
+					break;
+				}
+			} else if (i.substring(0,1)=='<') {
+				if (num>=parseInt(i.replace('<',''))) {
+					resp=false;
+					break;
+				}
+			}
+		}
+	} else {
+		// 'or/any' (2,3,5)
+		resp=false;
+		for (let i of test.split(',')) {
+			if (num==i) {
+				resp=true;
+				break;
+			}
+		}
+	}
+	return resp;
 }

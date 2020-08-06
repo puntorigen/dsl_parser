@@ -50,7 +50,7 @@ Get all nodes that contain the given arguments (all optional)
 | [level] | <code>Int</code> |  | Finds all nodes that are on this level |
 | [link] | <code>String</code> |  | Finds all nodes that contains this link |
 | [recurse] | <code>Boolean</code> | <code>true</code> | include its children |
-| [nodes_raw] | <code>Boolean</code> | <code>false</code> | if recurse is false and this is true, includes key nodes_raw (children nodes) in result with a cheerio reference instead of processing them. |
+| [nodes_raw] | <code>Boolean</code> | <code>false</code> | if this is true, includes key nodes_raw (children nodes) in result with a cheerio reference instead of processing them. |
 
 <a name="module_dsl_parser+getNode"></a>
 

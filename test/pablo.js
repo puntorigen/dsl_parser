@@ -14,8 +14,14 @@ var myArgs = process.argv.slice(2);
     console.timeEnd('create git dsl');
     //console.log('new git dsl',gitdsl);
 
+    // get all level 2 nodes
+    console.time('get all config');
+    let level2 = await test.getNodes({ text:'config', icon:'desktop_new', level:'2', recurse:true, nodes_raw:true });
+    console.timeEnd('get all config');
+    
     // get 1 node
     /*     */
+    /*
     console.time('test singlenode');
     let nodetest = await test.getNode({ id:'ID_531063662',recurse:true, $:false });
     console.timeEnd('test singlenode');
@@ -42,11 +48,7 @@ var myArgs = process.argv.slice(2);
     let pattern2 = test.findVariables({ text:'La **persona**, que va **accion** es muy **tipo**.', array:true });
     console.log('findVariables2 result',pattern2);    
     
-    /*
-    // get all level 2 nodes
-    console.time('level 2 nodes');
-    let level2 = await test.getNodes({ level:2, recurse:true });
-    console.timeEnd('level 2 nodes');
+    
     */
     //console.log('debug level 2',level2);
     //console.log('debug level 2,config nodes',level2[0].nodes);
