@@ -196,7 +196,7 @@ export default class dsl_parser {
 				}
 			});
 		}
-		console.log('resp',resp);
+		//console.log('resp',resp);
 		return resp;
 	}
 
