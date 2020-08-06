@@ -284,8 +284,8 @@ export default class dsl_parser {
 			// get image if any on node
 			cur.find('node[ID='+resp.id+'] > richcontent[TYPE=NODE] body').map(function(a,a_elem) {
 				resp.text_rich = me.$(a_elem).html();
-				me.$(a_elem).find('img[SRC]').map(function(i,i_elem) {
-					resp.image = me.$(i_elem).attr('SRC');
+				me.$(a_elem).find('img[src]').map(function(i,i_elem) {
+					resp.image = me.$(i_elem).attr('src');
 				});
 			});
 			// get notes on node if any
