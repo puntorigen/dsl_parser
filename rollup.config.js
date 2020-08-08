@@ -6,7 +6,8 @@ const config = {
   external: [],
   output: {
     file: 'lib/index.js',
-    format: 'cjs',
+    format: 'umd',
+    name: 'dslparser',
     sourcemap: false
   },
 
