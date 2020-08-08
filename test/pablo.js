@@ -1,4 +1,5 @@
-const dsl_parser = require('../lib/index');
+const dsl_parser = require('../lib/index').dsl_parser;
+console.log(dsl_parser);
 var myArgs = process.argv.slice(2);
 
 (async () => {

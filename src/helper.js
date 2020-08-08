@@ -1,5 +1,3 @@
-var colors_ = require('colors')
-
 export default class helper {
 
 	constructor(config) {
