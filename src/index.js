@@ -1,4 +1,4 @@
-//import helper from 'helper'
+import helper from './helper'
 /**
 * dsl_parser: A class for parsing Concepto DSL files, and compile them with the OPEN Framework.
 * @name 	dsl_parser
@@ -43,7 +43,7 @@
  * @property {string} style - Graphical representation type of link (source-to-target, target-to-source, both-ways). 
 */
 
-export class dsl_parser {
+export default class dsl_parser {
 
 	constructor({ file=this.throwIfMissing('file'), config={} }={}) {
 		let console_ = require('open_console');
@@ -548,51 +548,4 @@ function numberInCondition(num,test2) {
 		}
 	}
 	return resp;
-}
-
-// helper class
-export class helper {
-
-	constructor(config) {
-		let def_config = { debug:true }; 
-		this.config = {...def_config,...config};
-	}
-
-	fixAccents(text,recover) {
-		let ctext = text;
-		let from = '';
-		const table = {
-			'C1'	:	'A',
-			'E1'	:	'á',
-			'C9'	:	'E',
-			'E9'	:	'é',
-			'CD'	:	'I',
-			'ED'	:	'í',
-			'D1'	:	'Ñ',
-			'F1'	:	'ñ',
-			'D3'	:	'O',
-			'F3'	:	'ó',
-			'DA'	:	'U',
-			'FA'	:	'ú',
-			'DC'	:	'U',
-			'FC'	:	'ü',
-			'AB'	:	'«',
-			'BB'	:	'»',
-			'BF'	:	'¿',
-			'A1'	:	'¡',
-			'80'	:	'€',
-			'20A7'	:	'Pts'
-		};
-		if (recover) {
-			for (from in table) {
-				ctext.replace(table[from],'&#x'+from);
-			}
-		} else {
-			for (from in table) {
-				ctext.replace('&#x'+from,table[from]);
-			}
-		}
-		return ctext;
-	}
-
 }
