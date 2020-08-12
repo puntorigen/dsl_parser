@@ -266,10 +266,10 @@ export default class dsl_parser {
 				resp.font.face = _fila.attr('NAME');
 				resp.font.size = _fila.attr('SIZE');
 				if (typeof _fila.attr('BOLD') != 'undefined') {
-					resp.font.bold = _fila.attr('BOLD');
+					resp.font.bold = (_fila.attr('BOLD')=='true')?true:false;
 				}
 				if (typeof _fila.attr('ITALIC') != 'undefined') {
-					resp.font.italic = _fila.attr('ITALIC');
+					resp.font.italic = (_fila.attr('ITALIC')=='true')?true:false;
 				}
 			});
 			// cloud definition
