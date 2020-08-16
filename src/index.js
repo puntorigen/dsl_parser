@@ -29,7 +29,7 @@ import helper from './helper'
  * @property {string} bgcolor - Background color of node.
  * @property {string} link - Link defined on node.
  * @property {string} position - Position in relation of central node (left,right).
- * @property {Object[]} attributes - Array of objects with each attribute (key is attribute name, value is attribute value).
+ * @property {Object} attributes - Object with each attribute (key is attribute name, value is attribute value).
  * @property {string[]} icons - Array with icon names used in the node.
  * @property {date} date_modified - Date of node when it was last modified.
  * @property {date} date_created - Date of node when it was created.
@@ -158,15 +158,21 @@ export default class dsl_parser {
 					// attribute
 					if (all_met && attribute && fmatch!='attribute') {
 						all_met = false;
-						tmp.attributes.map(function(x){ 
+						/*tmp.attributes.map(function(x){ 
 							if(Object.keys(x)[0]==attribute) all_met=true; 
+						});*/
+						Object.keys(tmp.attributes).map(function(x){ 
+							if(x==attribute) all_met=true; 
 						});
 					}
 					// attribute_value
 					if (all_met && attribute_value && fmatch!='attribute_value') {
 						all_met = false;
-						tmp.attribute_value.map(function(x){ 
+						/*tmp.attribute_value.map(function(x){ 
 							if(Object.keys(x)[1]==attribute_value) all_met=true; 
+						});*/
+						Object.keys(tmp.attributes).map(function(x){ 
+							if(attr[x]==attribute_value) all_met=true; 
 						});
 					}
 					// icon
@@ -218,7 +224,7 @@ export default class dsl_parser {
 						font:
 							{ face:'SansSerif', size:12, bold:false, italic:false },
 						style:'',		color: '',	bgcolor: '',	link:'',	position:'',
-						attributes: [],	icons: [],	
+						attributes: {},	icons: [],	
 						date_modified: new Date(),	
 						date_created: new Date(),
 						valid: true
@@ -253,8 +259,9 @@ export default class dsl_parser {
 			// attributes
 			cur.find('node[ID='+resp.id+'] > attribute').map(function(a,a_elem) {
 				let tmp_fila = {}, _fila = me.$(a_elem);
-				tmp_fila[_fila.attr('NAME')] = _fila.attr('VALUE');
-				resp.attributes.push(tmp_fila);
+				//tmp_fila[_fila.attr('NAME')] = _fila.attr('VALUE');
+				//resp.attributes.push(tmp_fila);
+				resp.attributes[_fila.attr('NAME')] = _fila.attr('VALUE');
 			});
 			// icons
 			cur.find('node[ID='+resp.id+'] > icon').map(function(a,a_elem) {
