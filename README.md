@@ -181,7 +181,7 @@ A node object representation of a DSL node.
 | bgcolor | <code>string</code> | Background color of node. |
 | link | <code>string</code> | Link defined on node. |
 | position | <code>string</code> | Position in relation of central node (left,right). |
-| attributes | <code>Array.&lt;Object&gt;</code> | Array of objects with each attribute (key is attribute name, value is attribute value). |
+| attributes | <code>Object</code> | Object with each attribute (key is attribute name, value is attribute value). |
 | icons | <code>Array.&lt;string&gt;</code> | Array with icon names used in the node. |
 | date_modified | <code>date</code> | Date of node when it was last modified. |
 | date_created | <code>date</code> | Date of node when it was created. |
