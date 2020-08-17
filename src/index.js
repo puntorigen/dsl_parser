@@ -56,6 +56,9 @@ export default class dsl_parser {
 		this.help = new helper();
 		this.debug = new console_({ silent:!this.config.debug });
 		this.$ = null;
+		this.x_memory_cache = {
+			getNode: {}
+		};
 	}
 
 	/**
@@ -216,143 +219,148 @@ export default class dsl_parser {
 	*/
 	async getNode({ id=this.throwIfMissing('id'), recurse=true, justlevel, dates=true, $=false, nodes_raw=false }={}) {
 		if (this.$===null) throw new Error('call process() first!');
-		let me = this;
-		let resp = { 	level:-1,	text:'',	text_rich:'',	text_note:'',	image:'',
-						cloud:
-							{ used:false, bgcolor:'' },	
-						arrows:[], 	nodes:[],
-						font:
-							{ face:'SansSerif', size:12, bold:false, italic:false },
-						style:'',		color: '',	bgcolor: '',	link:'',	position:'',
-						attributes: {},	icons: [],	
-						date_modified: new Date(),	
-						date_created: new Date(),
-						valid: true
-					};
-		let nodes = await me.$('node[ID='+id+']').each(async function(i,elem) {
-			let cur = me.$(elem), pa_ac = -1;
-			resp.id = cur.attr('ID');
-			resp.level = cur.parents('node').length+1;
-			// limit level if defined
-			if (justlevel && resp.level!=justlevel) {
-				resp.valid=false;
-				return false;
-			}
-			// add ref to $
-			if ($) resp.$ = cur;
-			//
-			if (typeof cur.attr('LINK') != 'undefined') resp.link = cur.attr('LINK').split('#').join('');
-			if (typeof cur.attr('POSITION') != 'undefined') resp.position = cur.attr('POSITION');
-			if (typeof cur.attr('COLOR') != 'undefined') resp.color = cur.attr('COLOR');
-			if (typeof cur.attr('BACKGROUND_COLOR') != 'undefined') resp.bgcolor = cur.attr('BACKGROUND_COLOR');
-			if (typeof cur.attr('STYLE') != 'undefined') resp.style = cur.attr('STYLE');
-			if (typeof cur.attr('TEXT') != 'undefined') resp.text = cur.attr('TEXT');
-			resp.text = resp.text 	.replaceAll('&lt;','<')
-									.replaceAll('&gt;','>')
-									.replaceAll('&amp;','&')
-									.replaceAll('&quot;','"');
-			// dates parsing
-			if (dates) {
-				if (typeof cur.attr('CREATED') != 'undefined') {
-					resp.date_created = new Date(parseFloat(cur.attr('CREATED')));		
+		if (id in this.x_memory_cache.getNode) {
+			return this.x_memory_cache.getNode[id];
+		} else {
+			let me = this;
+			let resp = { 	level:-1,	text:'',	text_rich:'',	text_note:'',	image:'',
+							cloud:
+								{ used:false, bgcolor:'' },	
+							arrows:[], 	nodes:[],
+							font:
+								{ face:'SansSerif', size:12, bold:false, italic:false },
+							style:'',		color: '',	bgcolor: '',	link:'',	position:'',
+							attributes: {},	icons: [],	
+							date_modified: new Date(),	
+							date_created: new Date(),
+							valid: true
+						};
+			let nodes = await me.$('node[ID='+id+']').each(async function(i,elem) {
+				let cur = me.$(elem), pa_ac = -1;
+				resp.id = cur.attr('ID');
+				resp.level = cur.parents('node').length+1;
+				// limit level if defined
+				if (justlevel && resp.level!=justlevel) {
+					resp.valid=false;
+					return false;
 				}
-				if (typeof cur.attr('MODIFIED') != 'undefined') {
-					resp.date_modified = new Date(parseFloat(cur.attr('MODIFIED')));	
-				}
-			}
-			// attributes
-			cur.find('node[ID='+resp.id+'] > attribute').map(function(a,a_elem) {
-				let tmp_fila = {}, _fila = me.$(a_elem);
-				//tmp_fila[_fila.attr('NAME')] = _fila.attr('VALUE');
-				//resp.attributes.push(tmp_fila);
-				resp.attributes[_fila.attr('NAME')] = _fila.attr('VALUE');
-			});
-			// icons
-			cur.find('node[ID='+resp.id+'] > icon').map(function(a,a_elem) {
-				resp.icons.push(me.$(a_elem).attr('BUILTIN'));
-			});
-			// fonts definition
-			cur.find('node[ID='+resp.id+'] > font').map(function(a,a_elem) {
-				let _fila = me.$(a_elem);
-				resp.font.face = _fila.attr('NAME');
-				resp.font.size = _fila.attr('SIZE');
-				if (typeof _fila.attr('BOLD') != 'undefined') {
-					resp.font.bold = (_fila.attr('BOLD')=='true')?true:false;
-				}
-				if (typeof _fila.attr('ITALIC') != 'undefined') {
-					resp.font.italic = (_fila.attr('ITALIC')=='true')?true:false;
-				}
-			});
-			// cloud definition
-			cur.find('node[ID='+resp.id+'] > cloud').map(function(a,a_elem) {
-				let _fila = me.$(a_elem);
-				resp.cloud.used = true;
-				if (typeof _fila.attr('COLOR') != 'undefined') {
-					resp.cloud.bgcolor = _fila.attr('COLOR');
-				}
-			});
-			// get image if any on node
-			cur.find('node[ID='+resp.id+'] > richcontent[TYPE=NODE] body').map(function(a,a_elem) {
-				resp.text_rich = me.$(a_elem).html();
-				me.$(a_elem).find('img[src]').map(function(i,i_elem) {
-					resp.image = me.$(i_elem).attr('src');
-				});
-			});
-			// get notes on node if any
-			cur.find('node[ID='+resp.id+'] > richcontent[TYPE=NOTE] body').map(function(a,a_elem) {
-				resp.text_note = me.$(a_elem).text();
-			});
-			// get defined arrows on node if any
-			cur.find('node[ID='+resp.id+'] > arrowlink').map(function(a,a_elem) {
-				let _fila = me.$(a_elem), _tmp_f={ target:'', color:'', style:'' }, _tmpa={};
-				_tmp_f.target = _fila.attr('DESTINATION');
-				if (typeof _fila.attr('COLOR') != 'undefined') {
-					_tmp_f.color = _fila.attr('COLOR');
-				}
-				_tmpa.type = _fila.attr('STARTARROW') + '-' + _fila.attr('ENDARROW');
-				if (_tmpa.type.indexOf('None-Default')!=-1) {
-					_tmp_f.style = 'source-to-target';
-				} else if (_tmpa.type.indexOf('Default-None')!=-1) {
-					_tmp_f.style = 'target-to-source';
-				} else {
-					_tmp_f.style = 'both-ways';
-				}
-				resp.arrows.push(_tmp_f);
-			});
-			// get children nodes .. (using myself for each child)
-			if (recurse==true) {
-				await cur.find('node').map(async function(a,a_elem) {
-					let _nodo = me.$(a_elem);
-					let hijo = await me.getNode({ id:_nodo.attr('ID'), recurse:recurse, justlevel:resp.level+1 });
-					if (hijo.valid) {
-						delete hijo.valid;
-						resp.nodes.push(hijo);
+				// add ref to $
+				if ($) resp.$ = cur;
+				//
+				if (typeof cur.attr('LINK') != 'undefined') resp.link = cur.attr('LINK').split('#').join('');
+				if (typeof cur.attr('POSITION') != 'undefined') resp.position = cur.attr('POSITION');
+				if (typeof cur.attr('COLOR') != 'undefined') resp.color = cur.attr('COLOR');
+				if (typeof cur.attr('BACKGROUND_COLOR') != 'undefined') resp.bgcolor = cur.attr('BACKGROUND_COLOR');
+				if (typeof cur.attr('STYLE') != 'undefined') resp.style = cur.attr('STYLE');
+				if (typeof cur.attr('TEXT') != 'undefined') resp.text = cur.attr('TEXT');
+				resp.text = resp.text 	.replaceAll('&lt;','<')
+										.replaceAll('&gt;','>')
+										.replaceAll('&amp;','&')
+										.replaceAll('&quot;','"');
+				// dates parsing
+				if (dates) {
+					if (typeof cur.attr('CREATED') != 'undefined') {
+						resp.date_created = new Date(parseFloat(cur.attr('CREATED')));		
 					}
-				}.bind(this));
-			} else if (nodes_raw==true) {
-				resp.nodes_raw = cur.find('node');
-				/* */
-				resp.getNodes = async function() {
-					// this.me and this.cur
-					let resp=[];
-					await this.cur.find('node').map(async function(a,a_elem) {
-						let _nodo = this.me.$(a_elem);
-						let hijo = await this.me.getNode({ id:_nodo.attr('ID'), justlevel:this.level+1, recurse:false, nodes_raw:true });
+					if (typeof cur.attr('MODIFIED') != 'undefined') {
+						resp.date_modified = new Date(parseFloat(cur.attr('MODIFIED')));	
+					}
+				}
+				// attributes
+				cur.find('node[ID='+resp.id+'] > attribute').map(function(a,a_elem) {
+					let tmp_fila = {}, _fila = me.$(a_elem);
+					//tmp_fila[_fila.attr('NAME')] = _fila.attr('VALUE');
+					//resp.attributes.push(tmp_fila);
+					resp.attributes[_fila.attr('NAME')] = _fila.attr('VALUE');
+				});
+				// icons
+				cur.find('node[ID='+resp.id+'] > icon').map(function(a,a_elem) {
+					resp.icons.push(me.$(a_elem).attr('BUILTIN'));
+				});
+				// fonts definition
+				cur.find('node[ID='+resp.id+'] > font').map(function(a,a_elem) {
+					let _fila = me.$(a_elem);
+					resp.font.face = _fila.attr('NAME');
+					resp.font.size = _fila.attr('SIZE');
+					if (typeof _fila.attr('BOLD') != 'undefined') {
+						resp.font.bold = (_fila.attr('BOLD')=='true')?true:false;
+					}
+					if (typeof _fila.attr('ITALIC') != 'undefined') {
+						resp.font.italic = (_fila.attr('ITALIC')=='true')?true:false;
+					}
+				});
+				// cloud definition
+				cur.find('node[ID='+resp.id+'] > cloud').map(function(a,a_elem) {
+					let _fila = me.$(a_elem);
+					resp.cloud.used = true;
+					if (typeof _fila.attr('COLOR') != 'undefined') {
+						resp.cloud.bgcolor = _fila.attr('COLOR');
+					}
+				});
+				// get image if any on node
+				cur.find('node[ID='+resp.id+'] > richcontent[TYPE=NODE] body').map(function(a,a_elem) {
+					resp.text_rich = me.$(a_elem).html();
+					me.$(a_elem).find('img[src]').map(function(i,i_elem) {
+						resp.image = me.$(i_elem).attr('src');
+					});
+				});
+				// get notes on node if any
+				cur.find('node[ID='+resp.id+'] > richcontent[TYPE=NOTE] body').map(function(a,a_elem) {
+					resp.text_note = me.$(a_elem).text();
+				});
+				// get defined arrows on node if any
+				cur.find('node[ID='+resp.id+'] > arrowlink').map(function(a,a_elem) {
+					let _fila = me.$(a_elem), _tmp_f={ target:'', color:'', style:'' }, _tmpa={};
+					_tmp_f.target = _fila.attr('DESTINATION');
+					if (typeof _fila.attr('COLOR') != 'undefined') {
+						_tmp_f.color = _fila.attr('COLOR');
+					}
+					_tmpa.type = _fila.attr('STARTARROW') + '-' + _fila.attr('ENDARROW');
+					if (_tmpa.type.indexOf('None-Default')!=-1) {
+						_tmp_f.style = 'source-to-target';
+					} else if (_tmpa.type.indexOf('Default-None')!=-1) {
+						_tmp_f.style = 'target-to-source';
+					} else {
+						_tmp_f.style = 'both-ways';
+					}
+					resp.arrows.push(_tmp_f);
+				});
+				// get children nodes .. (using myself for each child)
+				if (recurse==true) {
+					await cur.find('node').map(async function(a,a_elem) {
+						let _nodo = me.$(a_elem);
+						let hijo = await me.getNode({ id:_nodo.attr('ID'), recurse:recurse, justlevel:resp.level+1 });
 						if (hijo.valid) {
 							delete hijo.valid;
-							resp.push(hijo);
+							resp.nodes.push(hijo);
 						}
 					}.bind(this));
-					return resp;
-				}.bind({me,cur,level:resp.level});
-			}
-			// break loop
-			return false;
-		});
-		// remove 'valid' key if justLevel is not defined
-		if (!justlevel) delete resp.valid;
-		// reply
-		return resp;
+				} else if (nodes_raw==true) {
+					resp.nodes_raw = cur.find('node');
+					/* */
+					resp.getNodes = async function() {
+						// this.me and this.cur
+						let resp=[];
+						await this.cur.find('node').map(async function(a,a_elem) {
+							let _nodo = this.me.$(a_elem);
+							let hijo = await this.me.getNode({ id:_nodo.attr('ID'), justlevel:this.level+1, recurse:false, nodes_raw:true });
+							if (hijo.valid) {
+								delete hijo.valid;
+								resp.push(hijo);
+							}
+						}.bind(this));
+						return resp;
+					}.bind({me,cur,level:resp.level});
+				}
+				// break loop
+				return false;
+			});
+			// remove 'valid' key if justLevel is not defined
+			if (!justlevel) delete resp.valid;
+			// reply
+			this.x_memory_cache.getNode[id] = resp;
+			return resp;
+		}
 	}
 
 	/**
