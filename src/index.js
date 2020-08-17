@@ -219,7 +219,7 @@ export default class dsl_parser {
 	*/
 	async getNode({ id=this.throwIfMissing('id'), recurse=true, justlevel, dates=true, $=false, nodes_raw=false }={}) {
 		if (this.$===null) throw new Error('call process() first!');
-		if (id in this.x_memory_cache.getNode) {
+		if (id in this.x_memory_cache.getNode && nodes_raw==false) {
 			return this.x_memory_cache.getNode[id];
 		} else {
 			let me = this;
