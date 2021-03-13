@@ -253,11 +253,13 @@ export default class dsl_parser {
 				if (typeof cur.attr('BACKGROUND_COLOR') != 'undefined') resp.bgcolor = cur.attr('BACKGROUND_COLOR');
 				if (typeof cur.attr('STYLE') != 'undefined') resp.style = cur.attr('STYLE');
 				if (typeof cur.attr('TEXT') != 'undefined') resp.text = cur.attr('TEXT');
-				resp.text = resp.text 	.replaceAll('&lt;','<')
+				let decode = require('decode-html');
+				resp.text = decode(resp.text);
+				/*resp.text = resp.text 	.replaceAll('&lt;','<')
 										.replaceAll('&gt;','>')
 										.replaceAll('&amp;','&')
 										.replaceAll('&apos;',`'`)
-										.replaceAll('&quot;',`"`);
+										.replaceAll('&quot;',`"`);*/
 				// dates parsing
 				if (dates) {
 					if (typeof cur.attr('CREATED') != 'undefined') {
