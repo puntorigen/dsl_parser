@@ -256,7 +256,8 @@ export default class dsl_parser {
 				resp.text = resp.text 	.replaceAll('&lt;','<')
 										.replaceAll('&gt;','>')
 										.replaceAll('&amp;','&')
-										.replaceAll('&quot;','"');
+										.replaceAll('&apos;',`'`)
+										.replaceAll('&quot;',`"`);
 				// dates parsing
 				if (dates) {
 					if (typeof cur.attr('CREATED') != 'undefined') {
