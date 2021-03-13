@@ -235,6 +235,7 @@ export default class dsl_parser {
 							date_created: new Date(),
 							valid: true
 						};
+			let he = require('he');
 			let nodes = await me.$('node[ID='+id+']').each(async function(i,elem) {
 				let cur = me.$(elem), pa_ac = -1;
 				resp.id = cur.attr('ID');
@@ -253,8 +254,7 @@ export default class dsl_parser {
 				if (typeof cur.attr('BACKGROUND_COLOR') != 'undefined') resp.bgcolor = cur.attr('BACKGROUND_COLOR');
 				if (typeof cur.attr('STYLE') != 'undefined') resp.style = cur.attr('STYLE');
 				if (typeof cur.attr('TEXT') != 'undefined') resp.text = cur.attr('TEXT');
-				let decode = require('decode-html');
-				resp.text = decode(resp.text);
+				resp.text = he.decode(resp.text);
 				/*resp.text = resp.text 	.replaceAll('&lt;','<')
 										.replaceAll('&gt;','>')
 										.replaceAll('&amp;','&')
