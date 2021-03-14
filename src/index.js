@@ -274,7 +274,7 @@ export default class dsl_parser {
 					let tmp_fila = {}, _fila = me.$(a_elem);
 					//tmp_fila[_fila.attr('NAME')] = _fila.attr('VALUE');
 					//resp.attributes.push(tmp_fila);
-					resp.attributes[_fila.attr('NAME')] = _fila.attr('VALUE');
+					resp.attributes[_fila.attr('NAME')] = he.decode(_fila.attr('VALUE'));
 				});
 				// icons
 				cur.find('node[ID='+resp.id+'] > icon').map(function(a,a_elem) {
