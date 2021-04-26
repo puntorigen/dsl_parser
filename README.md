@@ -14,7 +14,7 @@ dsl_parser: A class for parsing Concepto DSL files, and compile them with the OP
         * [.getParentNode(id, [recurse])](#module_dsl_parser+getParentNode) ⇒ <code>NodeDSL</code>
         * [.getParentNodesIDs(id, [array])](#module_dsl_parser+getParentNodesIDs) ⇒ <code>String</code> \| <code>Array</code>
         * [.getChildrenNodesIDs(id, [array])](#module_dsl_parser+getChildrenNodesIDs) ⇒ <code>String</code> \| <code>Array</code>
-        * [.getBrotherNodesIDs(id, [before], [after])](#module_dsl_parser+getBrotherNodesIDs) ⇒ <code>String</code>
+        * [.getBrotherNodesIDs(id, [before], [after], [array])](#module_dsl_parser+getBrotherNodesIDs) ⇒ <code>String</code>
         * [.createGitVersion()](#module_dsl_parser+createGitVersion) ⇒ <code>String</code>
         * [.findVariables(text, [symbol], [symbol_closing], [array])](#module_dsl_parser+findVariables) ⇒ <code>String</code>
         * [.replaceVarsSymbol(text, from, to)](#module_dsl_parser+replaceVarsSymbol) ⇒ <code>String</code>
@@ -61,7 +61,7 @@ Get node data for the given id
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
-| id | <code>Int</code> |  | ID of node to request |
+| id | <code>String</code> |  | ID of node to request |
 | [recurse] | <code>Boolean</code> | <code>true</code> | include its children |
 | [dates] | <code>Boolean</code> | <code>true</code> | include parsing creation/modification dates |
 | [$] | <code>Boolean</code> | <code>false</code> | include cheerio reference |
@@ -76,7 +76,7 @@ Returns the parent node of the given node id
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
-| id | <code>Int</code> |  | ID of node to request |
+| id | <code>String</code> |  | ID of node to request |
 | [recurse] | <code>Boolean</code> | <code>false</code> | include its children |
 
 <a name="module_dsl_parser+getParentNodesIDs"></a>
@@ -88,7 +88,7 @@ Returns the parent nodes ids of the given node id
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
-| id | <code>Int</code> |  | node id to query |
+| id | <code>String</code> |  | node id to query |
 | [array] | <code>Boolean</code> | <code>false</code> | get results as array, or as a string |
 
 <a name="module_dsl_parser+getChildrenNodesIDs"></a>
@@ -100,21 +100,22 @@ Returns the children nodes ids of the given node id
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
-| id | <code>Int</code> |  | node id to query |
+| id | <code>String</code> |  | node id to query |
 | [array] | <code>Boolean</code> | <code>false</code> | get results as array, or as a string |
 
 <a name="module_dsl_parser+getBrotherNodesIDs"></a>
 
-### dsl_parser.getBrotherNodesIDs(id, [before], [after]) ⇒ <code>String</code>
+### dsl_parser.getBrotherNodesIDs(id, [before], [after], [array]) ⇒ <code>String</code>
 Returns the brother nodes ids of the given node id
 
 **Kind**: instance method of [<code>dsl\_parser</code>](#module_dsl_parser)  
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
-| id | <code>Int</code> |  | node id to query |
+| id | <code>String</code> |  | node id to query |
 | [before] | <code>Boolean</code> | <code>true</code> | consider brothers before the queried node |
 | [after] | <code>Boolean</code> | <code>true</code> | consider brothers after the queried node |
+| [array] | <code>Boolean</code> | <code>false</code> | get results as array, or as a string |
 
 <a name="module_dsl_parser+createGitVersion"></a>
 
@@ -160,7 +161,7 @@ A node object representation of a DSL node.
 
 | Name | Type | Description |
 | --- | --- | --- |
-| id | <code>number</code> | Node unique ID. |
+| id | <code>string</code> | Node unique ID. |
 | level | <code>number</code> | Indicates the depth level from the center of the dsl map. |
 | text | <code>string</code> | Indicates the text defined in the node itself. |
 | text_rich | <code>string</code> | Indicates the html defined in the node itself. |

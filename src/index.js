@@ -8,7 +8,7 @@ import helper from './helper'
 /**
  * A node object representation of a DSL node.
  * @typedef {Object} NodeDSL
- * @property {number} id - Node unique ID.
+ * @property {string} id - Node unique ID.
  * @property {number} level - Indicates the depth level from the center of the dsl map.
  * @property {string} text - Indicates the text defined in the node itself.
  * @property {string} text_rich - Indicates the html defined in the node itself.
@@ -210,7 +210,7 @@ export default class dsl_parser {
 
 	/**
 	* Get node data for the given id
-	* @param 	{Int}		id				- ID of node to request
+	* @param 	{String}	id				- ID of node to request
 	* @param 	{Boolean}	[recurse=true] 	- include its children
 	* @param 	{Boolean}	[dates=true]	- include parsing creation/modification dates
 	* @param 	{Boolean}	[$=false]		- include cheerio reference
@@ -219,7 +219,7 @@ export default class dsl_parser {
 	*/
 	async getNode({ id=this.throwIfMissing('id'), recurse=true, justlevel, dates=true, $=false, nodes_raw=false }={}) {
 		if (this.$===null) throw new Error('call process() first!');
-		if (id in this.x_memory_cache.getNode && nodes_raw==false) {
+		if (id in this.x_memory_cache.getNode && nodes_raw==false && $==false) {
 			return this.x_memory_cache.getNode[id];
 		} else {
 			let me = this;
@@ -368,7 +368,7 @@ export default class dsl_parser {
 
 	/**
 	* Returns the parent node of the given node id
-	* @param 	{Int}		id				- ID of node to request
+	* @param 	{String}	id				- ID of node to request
 	* @param 	{Boolean}	[recurse=false] - include its children
 	* @return 	{NodeDSL} 
 	*/
@@ -384,7 +384,7 @@ export default class dsl_parser {
 
 	/**
 	* Returns the parent nodes ids of the given node id
-	* @param 	{Int}			id 				- node id to query
+	* @param 	{String}		id 				- node id to query
 	* @param 	{Boolean}		[array=false]	- get results as array, or as a string
 	* @return 	{String|Array}
 	*/
@@ -408,7 +408,7 @@ export default class dsl_parser {
 
 	/**
 	* Returns the children nodes ids of the given node id
-	* @param 	{Int}		id 				- node id to query
+	* @param 	{String}	id 				- node id to query
 	* @param 	{Boolean}	[array=false]	- get results as array, or as a string
 	* @return 	{String|Array}
 	*/
@@ -430,12 +430,13 @@ export default class dsl_parser {
 
 	/**
 	* Returns the brother nodes ids of the given node id
-	* @param 	{Int}		id 				- node id to query
+	* @param 	{String}	id 				- node id to query
 	* @param 	{Boolean}	[before=true] 	- consider brothers before the queried node
 	* @param 	{Boolean}	[after=true] 	- consider brothers after the queried node
+	* @param 	{Boolean}	[array=false]	- get results as array, or as a string
 	* @return 	{String}
 	*/
-	async getBrotherNodesIDs({ id=this.throwIfMissing('id'), before=true, after=true }={}) {
+	async getBrotherNodesIDs({ id=this.throwIfMissing('id'), before=true, after=true, array=false }={}) {
 		let me_data = await this.getNode({ id:id, recurse:false, $:true });
 		let resp = [];
 		if (before) {
@@ -453,7 +454,11 @@ export default class dsl_parser {
 			}	
 		}
 		// return
-		return resp.join(',');
+		if (array) {
+			return resp;
+		} else {
+			return resp.join(',');
+		}
 	}
 
 	/**
