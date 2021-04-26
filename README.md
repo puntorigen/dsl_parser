@@ -115,7 +115,7 @@ Returns the brother nodes ids of the given node id
 | id | <code>String</code> |  | node id to query |
 | [before] | <code>Boolean</code> | <code>true</code> | consider brothers before the queried node |
 | [after] | <code>Boolean</code> | <code>true</code> | consider brothers after the queried node |
-| [array] | <code>Boolean</code> | <code>false</code> | get results as array, or as a string |
+| [array] | <code>Boolean</code> | <code>false</code> | get results as array of objects, or as a string |
 
 <a name="module_dsl_parser+createGitVersion"></a>
 

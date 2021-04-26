@@ -433,7 +433,7 @@ export default class dsl_parser {
 	* @param 	{String}	id 				- node id to query
 	* @param 	{Boolean}	[before=true] 	- consider brothers before the queried node
 	* @param 	{Boolean}	[after=true] 	- consider brothers after the queried node
-	* @param 	{Boolean}	[array=false]	- get results as array, or as a string
+	* @param 	{Boolean}	[array=false]	- get results as array of objects, or as a string
 	* @return 	{String}
 	*/
 	async getBrotherNodesIDs({ id=this.throwIfMissing('id'), before=true, after=true, array=false }={}) {
@@ -442,14 +442,22 @@ export default class dsl_parser {
 		if (before) {
 			let prev = me_data.$.prev('node'); 
 			while (typeof prev.get(0) != 'undefined') {
-				resp.push(prev.get(0).attribs.ID);
+				if (array==false) {
+					resp.push(prev.get(0).attribs.ID);
+				} else {
+					resp.push(prev.get(0).attribs);
+				}
 				prev = prev.prev('node');
 			}
 		}
 		if (after) {
 			let next = me_data.$.next('node'); 
 			while (typeof next.get(0) != 'undefined') {
-				resp.push(next.get(0).attribs.ID);
+				if (array==false) {
+					resp.push(next.get(0).attribs.ID);
+				} else {
+					resp.push(next.get(0).attribs);
+				}
 				next = next.next('node');
 			}	
 		}
