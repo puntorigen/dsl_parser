@@ -219,7 +219,7 @@ export default class dsl_parser {
 	*/
 	async getNode({ id=this.throwIfMissing('id'), recurse=true, justlevel, dates=true, $=false, nodes_raw=false }={}) {
 		if (this.$===null) throw new Error('call process() first!');
-		if (id in this.x_memory_cache.getNode && nodes_raw==false && $==false) {
+		if (id in this.x_memory_cache.getNode && this.x_memory_cache.getNode[id].valid && this.x_memory_cache.getNode[id].valid==true && nodes_raw==false && $==false) {
 			return this.x_memory_cache.getNode[id];
 		} else {
 			let me = this;
@@ -334,7 +334,7 @@ export default class dsl_parser {
 						let _nodo = me.$(a_elem);
 						let hijo = await me.getNode({ id:_nodo.attr('ID'), recurse:recurse, justlevel:resp.level+1 });
 						if (hijo.valid) {
-							delete hijo.valid;
+							//delete hijo.valid;
 							resp.nodes.push(hijo);
 						}
 					}.bind(this));
@@ -348,7 +348,7 @@ export default class dsl_parser {
 							let _nodo = this.me.$(a_elem);
 							let hijo = await this.me.getNode({ id:_nodo.attr('ID'), justlevel:this.level+1, recurse:false, nodes_raw:true });
 							if (hijo.valid) {
-								delete hijo.valid;
+								//delete hijo.valid;
 								resp.push(hijo);
 							}
 						}.bind(this));
@@ -358,10 +358,12 @@ export default class dsl_parser {
 				// break loop
 				return false;
 			});
-			// remove 'valid' key if justLevel is not defined
-			if (!justlevel) delete resp.valid;
+			if (resp.valid && resp.valid==true && nodes_raw==false && $==false) {
+				// remove 'valid' key if justLevel is not defined
+				//if (!justlevel) delete resp.valid; //this doesnt seem right (27-4-21)
+				this.x_memory_cache.getNode[id] = resp;
+			}			
 			// reply
-			this.x_memory_cache.getNode[id] = resp;
 			return resp;
 		}
 	}
