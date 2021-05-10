@@ -42,6 +42,7 @@ import helper from './helper'
  * @property {string} color - Color of visual connection.
  * @property {string} style - Graphical representation type of link (source-to-target, target-to-source, both-ways). 
 */
+//import console_ from '../../console/src/index'
 
 export default class dsl_parser {
 
@@ -60,6 +61,12 @@ export default class dsl_parser {
 			getNode: {}
 		};
 	}
+
+	async hash(thing) {
+        const {sha1} = require('crypto-hash');
+        let resp = await sha1(thing,{ outputFormat:'hex' });
+        return resp;
+    }
 
 	/**
 	* Executes initial processing for parser
@@ -111,7 +118,7 @@ export default class dsl_parser {
 	* @param 	{Boolean}	[nodes_raw=false]	- if this is true, includes key nodes_raw (children nodes) in result with a cheerio reference instead of processing them.
 	* @return 	{NodeDSL[]}
 	*/
-	async getNodes({ text,attribute,attribute_value,icon,level,link,recurse=true,nodes_raw=false }={}) {
+	async getNodes({ text,attribute,attribute_value,icon,level,link,recurse=true,nodes_raw=false, hash_content=false }={}) {
 		let resp = [], nodes=null, me=this, fmatch='';
 		if (nodes_raw==true) recurse=false;
 		// match first param that is defined
@@ -153,7 +160,7 @@ export default class dsl_parser {
 			await nodes.map(async function(i,elem) {
 				let cur = me.$(elem);
 				if (typeof cur.attr('ID') != 'undefined') {
-					let tmp = await me.getNode({ id:cur.attr('ID'), recurse:recurse, nodes_raw:nodes_raw });
+					let tmp = await me.getNode({ id:cur.attr('ID'), recurse, nodes_raw, hash_content });
 					// re-filter to see if all params defined match in this node (@TODO make more efficient doing before calling getNode; needs to be re-thinked)
 					let all_met = true;
 					// text
@@ -217,7 +224,7 @@ export default class dsl_parser {
 	* @param 	{Boolean}	[nodes_raw=false]	- if recurse is false and this is true, includes key nodes_raw (children nodes) in result with a cheerio reference instead of processing them.
 	* @return 	{NodeDSL[]}
 	*/
-	async getNode({ id=this.throwIfMissing('id'), recurse=true, justlevel, dates=true, $=false, nodes_raw=false }={}) {
+	async getNode({ id=this.throwIfMissing('id'), recurse=true, justlevel, dates=true, $=false, nodes_raw=false, hash_content=false }={}) {
 		if (this.$===null) throw new Error('call process() first!');
 		if (id in this.x_memory_cache.getNode && this.x_memory_cache.getNode[id].valid && this.x_memory_cache.getNode[id].valid==true && nodes_raw==false && $==false) {
 			return this.x_memory_cache.getNode[id];
@@ -247,6 +254,10 @@ export default class dsl_parser {
 				}
 				// add ref to $
 				if ($) resp.$ = cur;
+				// add hash of content
+				if (hash_content && hash_content==true) {
+					resp.hash_content = hash(cur.html());
+				}
 				//
 				if (typeof cur.attr('LINK') != 'undefined') resp.link = cur.attr('LINK').split('#').join('');
 				if (typeof cur.attr('POSITION') != 'undefined') resp.position = cur.attr('POSITION');
@@ -347,7 +358,7 @@ export default class dsl_parser {
 						await this.cur.find('node').map(async function(a,a_elem) {
 							let _nodo = this.me.$(a_elem);
 							let hijo = await this.me.getNode({ id:_nodo.attr('ID'), justlevel:this.level+1, recurse:false, nodes_raw:true });
-							if (hijo.valid) {
+							if (hijo.valid) { //10may21 @check this, maybe needs && hijo.valid==true
 								//delete hijo.valid;
 								resp.push(hijo);
 							}
@@ -619,3 +630,4 @@ String.prototype.replaceAll = function(strReplace, strWith) {
     var reg = new RegExp(esc, 'ig');
     return this.replace(reg, strWith);
 };
+
