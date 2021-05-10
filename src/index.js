@@ -63,9 +63,12 @@ export default class dsl_parser {
 	}
 
 	async hash(thing) {
-        const {sha1} = require('crypto-hash');
+		let cryp = require('crypto').createHash;
+		let resp = cryp('sha256').update(thing).digest('hex');
+        /*const {sha1} = require('crypto-hash');
         let resp = await sha1(thing,{ outputFormat:'hex' });
-        return resp;
+        */
+	   	return resp;
     }
 
 	/**
@@ -160,7 +163,7 @@ export default class dsl_parser {
 			await nodes.map(async function(i,elem) {
 				let cur = me.$(elem);
 				if (typeof cur.attr('ID') != 'undefined') {
-					let tmp = await me.getNode({ id:cur.attr('ID'), recurse, nodes_raw, hash_content });
+					let tmp = await me.getNode({ id:cur.attr('ID'), recurse:recurse, nodes_raw:nodes_raw, hash_content:hash_content });
 					// re-filter to see if all params defined match in this node (@TODO make more efficient doing before calling getNode; needs to be re-thinked)
 					let all_met = true;
 					// text
@@ -255,8 +258,12 @@ export default class dsl_parser {
 				// add ref to $
 				if ($) resp.$ = cur;
 				// add hash of content
+				//me.debug.outT({ message:'creating hash for node '+resp.id });
 				if (hash_content && hash_content==true) {
-					resp.hash_content = hash(cur.html());
+					let content_ = cur.html();
+					//me.debug.outT({ message:'content:'+content_ });
+					resp.hash_content = await me.hash(content_);
+					//me.debug.outT({ message:'hash created:'+resp.hash_content });
 				}
 				//
 				if (typeof cur.attr('LINK') != 'undefined') resp.link = cur.attr('LINK').split('#').join('');
@@ -343,7 +350,7 @@ export default class dsl_parser {
 				if (recurse==true) {
 					await cur.find('node').map(async function(a,a_elem) {
 						let _nodo = me.$(a_elem);
-						let hijo = await me.getNode({ id:_nodo.attr('ID'), recurse:recurse, justlevel:resp.level+1 });
+						let hijo = await me.getNode({ id:_nodo.attr('ID'), recurse:recurse, justlevel:resp.level+1, hash_content:hash_content });
 						if (hijo.valid) {
 							//delete hijo.valid;
 							resp.nodes.push(hijo);
@@ -357,7 +364,7 @@ export default class dsl_parser {
 						let resp=[];
 						await this.cur.find('node').map(async function(a,a_elem) {
 							let _nodo = this.me.$(a_elem);
-							let hijo = await this.me.getNode({ id:_nodo.attr('ID'), justlevel:this.level+1, recurse:false, nodes_raw:true });
+							let hijo = await this.me.getNode({ id:_nodo.attr('ID'), justlevel:this.level+1, recurse:false, nodes_raw:true, hash_content:hash_content });
 							if (hijo.valid) { //10may21 @check this, maybe needs && hijo.valid==true
 								//delete hijo.valid;
 								resp.push(hijo);
