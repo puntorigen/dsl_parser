@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "dsl_parser",
-  "version": "1.3.2",
+  "version": "1.3.3",
   "description": "Punto Origen OPEN - ES6 DSL Parser Class",
   "keywords": [
     "creador",
@@ -29,6 +29,7 @@
     "docs": "jsdoc2md -t README.hbs src/*.js > README.md"
   },
   "dependencies": {
+    "@ronomon/crypto-async": "^5.0.1",
     "cheerio": "^1.0.0-rc.3",
     "crypto-hash": "^1.3.0",
     "he": "^1.2.0",

@@ -63,11 +63,20 @@ export default class dsl_parser {
 	}
 
 	async hash(thing) {
+		let resp = thing.toString();
+		if (thing) {
+			let cryptoAsync = require('@ronomon/crypto-async');
+			let hmac = await cryptoAsync.hmac('sha256',Buffer.alloc(1024), Buffer.from(thing,'utf-8'));
+			resp = hmac.toString('hex');
+		}
+		/*
 		let cryp = require('crypto').createHash;
-		let resp = cryp('sha256').update(thing).digest('hex');
-        /*const {sha1} = require('crypto-hash');
+		let resp = cryp('sha256').update(thing).digest('hex');*/
+		/*
+        const {sha1} = require('crypto-hash');
         let resp = await sha1(thing,{ outputFormat:'hex' });
-        */
+    	*/
+
 	   	return resp;
     }
 
