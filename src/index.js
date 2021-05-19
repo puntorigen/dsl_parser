@@ -505,9 +505,10 @@ export default class dsl_parser {
 
 	/**
 	* Returns a modified version of the current loaded DSL, ready to be push to a version control (like github)
-	* @return 	{String} 	Modified DSL source ready to be saved and pushed to a version control
+	* @param 	{Function}	[extrastep] 	- Optional method to return make additional cleansing and return the xml
+	* @return 	{String} 					  Modified DSL source ready to be saved and pushed to a version control
 	*/
-	async createGitVersion() {
+	async createGitVersion(extrastep) {
 		// 1) get copy of current DSL content into memory (for restoring after returning)
 		let copy = this.$.html(), me = this;
 		// 2) get all nodes
@@ -525,6 +526,10 @@ export default class dsl_parser {
 		});
 		// 7) transform all latin accents into original-unicodes (fixAccents(text,recover=true) (helper class))
 		let resp = this.$.html();
+		// 8) extrastep
+		if (extrastep && typeof extrastep == 'function') {
+			resp = extrastep(this.$);
+		}
 		resp = this.help.fixAccents(resp,true);
 		// recover original tags to current parser $.
 		this.$ = this.$.load(copy, { ignoreWhitespace: false, xmlMode:true, decodeEntities:false });
