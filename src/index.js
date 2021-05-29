@@ -241,7 +241,7 @@ export default class dsl_parser {
 	* @param 	{Boolean}	[nodes_raw=false]	- if recurse is false and this is true, includes key nodes_raw (children nodes) in result with a cheerio reference instead of processing them.
 	* @return 	{NodeDSL[]}
 	*/
-	async getNode({ id=this.throwIfMissing('id'), recurse=true, justlevel, dates=true, $=false, nodes_raw=false, hash_content=false }={}) {
+	async getNode({ id=this.throwIfMissing('id - getNode'), recurse=true, justlevel, dates=true, $=false, nodes_raw=false, hash_content=false }={}) {
 		if (this.$===null) throw new Error('call process() first!');
 		if (id in this.x_memory_cache.getNode && this.x_memory_cache.getNode[id].valid && this.x_memory_cache.getNode[id].valid==true && nodes_raw==false && $==false) {
 			return this.x_memory_cache.getNode[id];
@@ -362,6 +362,7 @@ export default class dsl_parser {
 				});
 				// get children nodes .. (using myself for each child)
 				if (recurse==true) {
+					//console.log('getNode recurse:true, getting subnodes of nodeID:'+id);
 					await cur.find('node').map(async function(a,a_elem) {
 						let _nodo = me.$(a_elem);
 						let hijo = await me.getNode({ id:_nodo.attr('ID'), recurse:recurse, justlevel:resp.level+1, hash_content:hash_content });
@@ -376,16 +377,30 @@ export default class dsl_parser {
 					resp.getNodes = async function() {
 						// this.me and this.cur
 						let resp=[];
+						//console.log('getNodes() called for node ID:'+this.dad.id);
 						await this.cur.find('node').map(async function(a,a_elem) {
 							let _nodo = this.me.$(a_elem);
-							let hijo = await this.me.getNode({ id:_nodo.attr('ID'), justlevel:this.level+1, recurse:false, nodes_raw:true, hash_content:hash_content });
-							if (hijo.valid) { //10may21 @check this, maybe needs && hijo.valid==true
-								//delete hijo.valid;
-								resp.push(hijo);
+							let _id = _nodo.attr('ID');
+							if (!_id) {
+								// 28-may-21 hack: if the node doesn't have an ID attr, invent one.
+								let getRandomInt = function(min, max) {
+									return Math.floor(Math.random() * (max - min)) + min;
+								}
+								_id = 'ID_'+getRandomInt(10000000,90000000);
+								_nodo.attr('ID',_id);
+							}
+							try {
+								let hijo = await this.me.getNode({ id:_id, justlevel:this.level+1, recurse:false, nodes_raw:true, hash_content:hash_content });
+								if (hijo.valid) { //10may21 @check this, maybe needs && hijo.valid==true
+									//delete hijo.valid;
+									resp.push(hijo);
+								}
+							} catch(errson) {
+								console.log('ERROR getting child node info: '+_nodo.toString(),errson);
 							}
 						}.bind(this));
 						return resp;
-					}.bind({me,cur,level:resp.level});
+					}.bind({me,cur,level:resp.level,dad:resp});
 				}
 				// break loop
 				return false;
@@ -406,7 +421,7 @@ export default class dsl_parser {
 	* @param 	{Boolean}	[recurse=false] - include its children
 	* @return 	{NodeDSL} 
 	*/
-	async getParentNode({ id=this.throwIfMissing('id'), recurse=false }={}) {
+	async getParentNode({ id=this.throwIfMissing('id - ParentNode'), recurse=false }={}) {
 		if (this.$===null) throw new Error('call process() first!');
 		let padre = this.$(`node[ID=${id}]`).parent('node');
 		let resp = {}, me = this;
@@ -422,7 +437,7 @@ export default class dsl_parser {
 	* @param 	{Boolean}		[array=false]	- get results as array, or as a string
 	* @return 	{String|Array}
 	*/
-	async getParentNodesIDs({ id=this.throwIfMissing('id'), array=false }={}) {
+	async getParentNodesIDs({ id=this.throwIfMissing('id - ParentNodesIDs'), array=false }={}) {
 		let padres = this.$(`node[ID=${id}]`).parents('node');
 		let resp = [], me=this;
 		padres.map(function(i,elem) {
@@ -446,7 +461,7 @@ export default class dsl_parser {
 	* @param 	{Boolean}	[array=false]	- get results as array, or as a string
 	* @return 	{String|Array}
 	*/
-	async getChildrenNodesIDs({ id=this.throwIfMissing('id'), array=false }={}) {
+	async getChildrenNodesIDs({ id=this.throwIfMissing('id - ChildrenNodesIDs'), array=false }={}) {
 		let hijos = this.$(`node[ID=${id}]`).find('node');
 		let resp = [], me=this;
 		hijos.map(function(i,elem) {
@@ -470,7 +485,7 @@ export default class dsl_parser {
 	* @param 	{Boolean}	[array=false]	- get results as array of objects, or as a string
 	* @return 	{String}
 	*/
-	async getBrotherNodesIDs({ id=this.throwIfMissing('id'), before=true, after=true, array=false }={}) {
+	async getBrotherNodesIDs({ id=this.throwIfMissing('id - BrotherNodesIDs'), before=true, after=true, array=false }={}) {
 		let me_data = await this.getNode({ id:id, recurse:false, $:true });
 		let resp = [];
 		if (before) {
