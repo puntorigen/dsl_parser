@@ -365,8 +365,17 @@ export default class dsl_parser {
 					//console.log('getNode recurse:true, getting subnodes of nodeID:'+id);
 					await cur.find('node').map(async function(a,a_elem) {
 						let _nodo = me.$(a_elem);
+						let _id = _nodo.attr('ID');
+						if (!_id) {
+							// 7-jun-21 hack: if the node doesn't have an ID attr, invent one.
+							let getRandomInt = function(min, max) {
+								return Math.floor(Math.random() * (max - min)) + min;
+							}
+							_id = 'ID_'+getRandomInt(10000000,90000000);
+							_nodo.attr('ID',_id);
+						}
 						try {
-							let hijo = await me.getNode({ id:_nodo.attr('ID'), recurse:recurse, justlevel:resp.level+1, hash_content:hash_content });
+							let hijo = await me.getNode({ id:_id, recurse:recurse, justlevel:resp.level+1, hash_content:hash_content });
 							if (hijo.valid) {
 								//delete hijo.valid;
 								resp.nodes.push(hijo);
