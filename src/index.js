@@ -365,10 +365,14 @@ export default class dsl_parser {
 					//console.log('getNode recurse:true, getting subnodes of nodeID:'+id);
 					await cur.find('node').map(async function(a,a_elem) {
 						let _nodo = me.$(a_elem);
-						let hijo = await me.getNode({ id:_nodo.attr('ID'), recurse:recurse, justlevel:resp.level+1, hash_content:hash_content });
-						if (hijo.valid) {
-							//delete hijo.valid;
-							resp.nodes.push(hijo);
+						try {
+							let hijo = await me.getNode({ id:_nodo.attr('ID'), recurse:recurse, justlevel:resp.level+1, hash_content:hash_content });
+							if (hijo.valid) {
+								//delete hijo.valid;
+								resp.nodes.push(hijo);
+							}
+						} catch(err00) {
+							console.log('ERROR getting child node info: '+_nodo.toString(),err00);
 						}
 					}.bind(this));
 				} else if (nodes_raw==true) {
