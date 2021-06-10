@@ -247,7 +247,7 @@ export default class dsl_parser {
 			return this.x_memory_cache.getNode[id];
 		} else {
 			let me = this;
-			let resp = { 	level:-1,	text:'',	text_rich:'',	text_note:'',	image:'',
+			let resp = { 	level:-1,	text:'',	text_rich:'',	text_note:'', 	text_note_html:'',	image:'',
 							cloud:
 								{ used:false, bgcolor:'' },	
 							arrows:[], 	nodes:[],
@@ -342,6 +342,7 @@ export default class dsl_parser {
 				// get notes on node if any
 				cur.find('node[ID='+resp.id+'] > richcontent[TYPE=NOTE] body').map(function(a,a_elem) {
 					resp.text_note = me.$(a_elem).text();
+					resp.text_note_html = me.$(a_elem).html();
 				});
 				// get defined arrows on node if any
 				cur.find('node[ID='+resp.id+'] > arrowlink').map(function(a,a_elem) {
