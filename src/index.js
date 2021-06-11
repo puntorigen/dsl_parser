@@ -243,7 +243,7 @@ export default class dsl_parser {
 		let me = this;
 		let parent = await this.$('node[ID='+parent_id+']').each(async function(i,elem) {
 			let cur = me.$(elem);
-			let txml = await me.nodeToXML(node);
+			let txml = await me.nodeToXML({node});
 			cur.append(txml);
 		});
 		return me.$.html();
