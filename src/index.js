@@ -233,6 +233,191 @@ export default class dsl_parser {
 	}
 
 	/**
+	 * Adds a node as an xml child of the given parent node ID
+	 * @param 	{String}	parent_id 		- ID of parent node
+	 * @param	{NodeDSL}	node			- NodeDSL object to add
+	 */
+	 async addNode({ parent_id=this.throwIfMissing('parent_id - addNode'), node=this.throwIfMissing('node - addNode') }={}) {
+		//to do idea: secret icon nodes -> encrypted json with 'secrets' config node within _git.dsl version (cli arg --secret 'pass' y --un_git (crea ver no git con secrets desencriptado))
+		//grab parentID
+		let parent = await this.$('node[ID='+parent_id+']').each(async function(i,elem) {
+			let cur = me.$(elem);
+			let txml = await this.nodeToXML(node);
+			cur.append(txml);
+		});
+		return this.$.html();
+	}
+
+	/**
+	 * Converts a NodeDSL into an XML of ConceptoDSL node child
+	 * @param	{NodeDSL}	node			- NodeDSL origin object
+	 */
+	async nodeToXML({ node=this.throwIfMissing('node - nodeToXML') }={}) {
+		let he = require('he');
+		let toxml = function(o) {
+			let { create } = require('xmlbuilder2');
+			return create(o).end({ prettyPrint:true });
+		};
+		let nodeToObj = function(node) {
+			let getRandomInt = function(min, max) {
+				return Math.floor(Math.random() * (max - min)) + min;
+			}
+			let base = { 		id:'ID_'+getRandomInt(10000000,90000000), level:-1,	text:'',	text_rich:'',	text_note:'', 	text_note_html:'',	image:'',
+								cloud:
+									{ used:false, bgcolor:'' },	
+								arrows:[], 	nodes:[],
+								font:
+									{ face:'SansSerif', size:12, bold:false, italic:false },
+								style:'',		color: '',	bgcolor: '',	link:'',	position:'',
+								attributes: {},	icons: [],	
+								date_modified: new Date(),	
+								date_created: new Date(),
+								valid: true
+							};
+			let node_obj = {...base,...node};
+			//prepare node_obj
+			let obj = {
+				NODE: { 
+					'@ID': node_obj.id
+				}
+			};
+			if (node_obj.date_created) obj.NODE['@CREATED'] = node_obj.date_created.getTime();
+			if (node_obj.date_modified) obj.NODE['@MODIFIED'] = node_obj.date_modified.getTime();
+			if (node_obj.link!='') obj.NODE['@LINK'] = '#'+node_obj.link;
+			if (node_obj.position!='') obj.NODE['@POSITION'] = node_obj.position;
+			if (node_obj.color!='') obj.NODE['@COLOR'] = node_obj.color;
+			if (node_obj.bgcolor!='') obj.NODE['@BACKGROUND_COLOR'] = node_obj.bgcolor;
+			if (node_obj.style!='') obj.NODE['@STYLE'] = node_obj.style;
+			if (node_obj.text!='') obj.NODE['@TEXT'] = node_obj.text;
+			//attributes
+			for (let att in node_obj.attributes) {
+				if (!obj.NODE['#']) obj.NODE['#'] = [];
+				obj.NODE['#'].push({
+					ATTRIBUTE: {
+						'@NAME': att,
+						'@VALUE': node_obj.attributes[att]
+					}
+				});
+			}
+			//icons
+			for (let icon of node_obj.icons) {
+				if (!obj.NODE['#']) obj.NODE['#'] = [];
+				obj.NODE['#'].push({
+					ICON: {
+						'@BUILTIN': icon
+					}
+				});
+			}
+			//fonts
+			if (node_obj.font!=base.font) {
+				if (!obj.NODE['#']) obj.NODE['#'] = [];
+				let font_obj={
+					FONT: {
+						'@NAME': node_obj.font.face,
+						'@SIZE': node_obj.font.size
+					}
+				};
+				if (node_obj.font.bold && node_obj.font.bold==true) font_obj.FONT['@BOLD']=true;
+				if (node_obj.font.italic && node_obj.font.italic==true) font_obj.FONT['@ITALIC']=true;
+				obj.NODE['#'].push(font_obj);
+			}
+			// cloud definition
+			if (node_obj.cloud.used==true) {
+				if (!obj.NODE['#']) obj.NODE['#'] = [];
+				obj.NODE['#'].push({
+					CLOUD: {
+						'@COLOR': node_obj.cloud.bgcolor
+					}
+				});
+			}
+			// image
+			if (node_obj.image!='') {
+				if (!obj.NODE['#']) obj.NODE['#'] = [];
+				obj.NODE['#'].push({
+					richcontent: {
+						'@TYPE': 'NODE',
+						'#': {  
+							html: {
+								head:{},
+								body: {
+									p: {
+										img: {
+											'@src':node_obj.image,
+											'@width':100,
+											'@height':100
+										}
+									}
+								}
+							}
+						}
+					}
+				});
+			}
+			// notes on node
+			if (node_obj.text_note!='' || node_obj.text_note_html!='') {
+				if (!obj.NODE['#']) obj.NODE['#'] = [];
+				let content = '';
+				if (node_obj.text_note) content = node_obj.text_note;
+				if (node_obj.text_note_html) content = node_obj.text_note_html;
+				let t = {
+					richcontent: {
+						'@TYPE': 'NOTE',
+						'#': {  
+							html: {
+								head:{},
+								body: {}
+							}
+						}
+					}
+				};
+				if (node_obj.text_note_html) {
+					t.richcontent['#'].html.body = node_obj.text_note_html;
+				} else {
+					t.richcontent['#'].html.body = { p:node_obj.text_note };
+				}
+				obj.NODE['#'].push(t);
+			}
+			// set node arrows
+			if (node_obj.arrows.length>0) {
+				if (!obj.NODE['#']) obj.NODE['#'] = [];
+				for (let arr of node_obj.arrows) {
+					let arrow = {
+						ARROWLINK: {
+							'@ID': 'Arrow_'+node_obj.id,
+							'@DESTINATION': arr.target,
+							'@STARTINCLINATION': '0;0;',
+							'@ENDINCLINATION': '0;0;'
+						}
+					};
+					if (arr.color!='') arrow.ARROWLINK['@COLOR'] = arr.color;
+					if (arr.type=='source-to-target') {
+						arrow.ARROWLINK['@STARTARROW'] = 'None';
+						arrow.ARROWLINK['@ENDARROW'] = 'Default';
+					} else if (arr.type=='target-to-source') {
+						arrow.ARROWLINK['@STARTARROW'] = 'Default';
+						arrow.ARROWLINK['@ENDARROW'] = 'None';
+					} else {
+						arrow.ARROWLINK['@STARTARROW'] = 'Default';
+						arrow.ARROWLINK['@ENDARROW'] = 'Default';
+					}
+					obj.NODE['#'].push(arrow);
+				}
+			}
+			//process children nodes
+			if (node_obj.nodes.length>0) {
+				for (let xc of node_obj.nodes) {
+					if (!obj.NODE['#']) obj.NODE['#'] = [];
+					obj.NODE['#'].push(nodeToObj(xc));
+				}
+			}
+			//
+			return obj;
+		};
+		//
+		return toxml(nodeToObj(node)).replace(`<?xml version="1.0"?>`,``);
+	}
+
+	/**
 	* Get node data for the given id
 	* @param 	{String}	id				- ID of node to request
 	* @param 	{Boolean}	[recurse=true] 	- include its children

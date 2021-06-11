@@ -10,6 +10,8 @@ dsl_parser: A class for parsing Concepto DSL files, and compile them with the OP
         * [.process()](#module_dsl_parser+process)
         * [.getParser()](#module_dsl_parser+getParser) ⇒ <code>Object</code>
         * [.getNodes([text], [attribute], [attribute_value], [icon], [level], [link], [recurse], [nodes_raw])](#module_dsl_parser+getNodes) ⇒ <code>Array.&lt;NodeDSL&gt;</code>
+        * [.addNode(parent_id, node)](#module_dsl_parser+addNode)
+        * [.nodeToXML(node)](#module_dsl_parser+nodeToXML)
         * [.getNode(id, [recurse], [dates], [$], [nodes_raw])](#module_dsl_parser+getNode) ⇒ <code>Array.&lt;NodeDSL&gt;</code>
         * [.getParentNode(id, [recurse])](#module_dsl_parser+getParentNode) ⇒ <code>NodeDSL</code>
         * [.getParentNodesIDs(id, [array])](#module_dsl_parser+getParentNodesIDs) ⇒ <code>String</code> \| <code>Array</code>
@@ -51,6 +53,29 @@ Get all nodes that contain the given arguments (all optional)
 | [link] | <code>String</code> |  | Finds all nodes that contains this link |
 | [recurse] | <code>Boolean</code> | <code>true</code> | include its children |
 | [nodes_raw] | <code>Boolean</code> | <code>false</code> | if this is true, includes key nodes_raw (children nodes) in result with a cheerio reference instead of processing them. |
+
+<a name="module_dsl_parser+addNode"></a>
+
+### dsl_parser.addNode(parent_id, node)
+Adds a node as an xml child of the given parent node ID
+
+**Kind**: instance method of [<code>dsl\_parser</code>](#module_dsl_parser)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| parent_id | <code>String</code> | ID of parent node |
+| node | <code>NodeDSL</code> | NodeDSL object to add |
+
+<a name="module_dsl_parser+nodeToXML"></a>
+
+### dsl_parser.nodeToXML(node)
+Converts a NodeDSL into an XML of ConceptoDSL node child
+
+**Kind**: instance method of [<code>dsl\_parser</code>](#module_dsl_parser)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| node | <code>NodeDSL</code> | NodeDSL origin object |
 
 <a name="module_dsl_parser+getNode"></a>
 
