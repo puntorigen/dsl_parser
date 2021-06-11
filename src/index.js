@@ -278,23 +278,23 @@ export default class dsl_parser {
 			let node_obj = {...base,...node};
 			//prepare node_obj
 			let obj = {
-				NODE: { 
+				node: { 
 					'@ID': node_obj.id
 				}
 			};
-			if (node_obj.date_created) obj.NODE['@CREATED'] = node_obj.date_created.getTime();
-			if (node_obj.date_modified) obj.NODE['@MODIFIED'] = node_obj.date_modified.getTime();
-			if (node_obj.link!='') obj.NODE['@LINK'] = '#'+node_obj.link;
-			if (node_obj.position!='') obj.NODE['@POSITION'] = node_obj.position;
-			if (node_obj.color!='') obj.NODE['@COLOR'] = node_obj.color;
-			if (node_obj.bgcolor!='') obj.NODE['@BACKGROUND_COLOR'] = node_obj.bgcolor;
-			if (node_obj.style!='') obj.NODE['@STYLE'] = node_obj.style;
-			if (node_obj.text!='') obj.NODE['@TEXT'] = node_obj.text;
+			if (node_obj.date_created) obj.node['@CREATED'] = node_obj.date_created.getTime();
+			if (node_obj.date_modified) obj.node['@MODIFIED'] = node_obj.date_modified.getTime();
+			if (node_obj.link!='') obj.node['@LINK'] = '#'+node_obj.link;
+			if (node_obj.position!='') obj.node['@POSITION'] = node_obj.position;
+			if (node_obj.color!='') obj.node['@COLOR'] = node_obj.color;
+			if (node_obj.bgcolor!='') obj.node['@BACKGROUND_COLOR'] = node_obj.bgcolor;
+			if (node_obj.style!='') obj.node['@STYLE'] = node_obj.style;
+			if (node_obj.text!='') obj.node['@TEXT'] = node_obj.text;
 			//attributes
 			for (let att in node_obj.attributes) {
-				if (!obj.NODE['#']) obj.NODE['#'] = [];
-				obj.NODE['#'].push({
-					ATTRIBUTE: {
+				if (!obj.node['#']) obj.node['#'] = [];
+				obj.node['#'].push({
+					attribute: {
 						'@NAME': att,
 						'@VALUE': node_obj.attributes[att]
 					}
@@ -302,39 +302,39 @@ export default class dsl_parser {
 			}
 			//icons
 			for (let icon of node_obj.icons) {
-				if (!obj.NODE['#']) obj.NODE['#'] = [];
-				obj.NODE['#'].push({
-					ICON: {
+				if (!obj.node['#']) obj.node['#'] = [];
+				obj.node['#'].push({
+					icon: {
 						'@BUILTIN': icon
 					}
 				});
 			}
 			//fonts
 			if (node_obj.font!=base.font) {
-				if (!obj.NODE['#']) obj.NODE['#'] = [];
+				if (!obj.node['#']) obj.node['#'] = [];
 				let font_obj={
-					FONT: {
+					font: {
 						'@NAME': node_obj.font.face,
 						'@SIZE': node_obj.font.size
 					}
 				};
-				if (node_obj.font.bold && node_obj.font.bold==true) font_obj.FONT['@BOLD']=true;
-				if (node_obj.font.italic && node_obj.font.italic==true) font_obj.FONT['@ITALIC']=true;
-				obj.NODE['#'].push(font_obj);
+				if (node_obj.font.bold && node_obj.font.bold==true) font_obj.font['@BOLD']=true;
+				if (node_obj.font.italic && node_obj.font.italic==true) font_obj.font['@ITALIC']=true;
+				obj.node['#'].push(font_obj);
 			}
 			// cloud definition
 			if (node_obj.cloud.used==true) {
-				if (!obj.NODE['#']) obj.NODE['#'] = [];
-				obj.NODE['#'].push({
-					CLOUD: {
+				if (!obj.node['#']) obj.node['#'] = [];
+				obj.node['#'].push({
+					cloud: {
 						'@COLOR': node_obj.cloud.bgcolor
 					}
 				});
 			}
 			// image
 			if (node_obj.image!='') {
-				if (!obj.NODE['#']) obj.NODE['#'] = [];
-				obj.NODE['#'].push({
+				if (!obj.node['#']) obj.node['#'] = [];
+				obj.node['#'].push({
 					richcontent: {
 						'@TYPE': 'NODE',
 						'#': {  
@@ -356,7 +356,7 @@ export default class dsl_parser {
 			}
 			// notes on node
 			if (node_obj.text_note!='' || node_obj.text_note_html!='') {
-				if (!obj.NODE['#']) obj.NODE['#'] = [];
+				if (!obj.node['#']) obj.node['#'] = [];
 				let content = '';
 				if (node_obj.text_note) content = node_obj.text_note;
 				if (node_obj.text_note_html) content = node_obj.text_note_html;
@@ -376,39 +376,39 @@ export default class dsl_parser {
 				} else {
 					t.richcontent['#'].html.body = { p:node_obj.text_note };
 				}
-				obj.NODE['#'].push(t);
+				obj.node['#'].push(t);
 			}
 			// set node arrows
 			if (node_obj.arrows.length>0) {
-				if (!obj.NODE['#']) obj.NODE['#'] = [];
+				if (!obj.node['#']) obj.node['#'] = [];
 				for (let arr of node_obj.arrows) {
 					let arrow = {
-						ARROWLINK: {
+						arrowlink: {
 							'@ID': 'Arrow_'+node_obj.id,
 							'@DESTINATION': arr.target,
 							'@STARTINCLINATION': '0;0;',
 							'@ENDINCLINATION': '0;0;'
 						}
 					};
-					if (arr.color!='') arrow.ARROWLINK['@COLOR'] = arr.color;
+					if (arr.color!='') arrow.arrowlink['@COLOR'] = arr.color;
 					if (arr.type=='source-to-target') {
-						arrow.ARROWLINK['@STARTARROW'] = 'None';
-						arrow.ARROWLINK['@ENDARROW'] = 'Default';
+						arrow.arrowlink['@STARTARROW'] = 'None';
+						arrow.arrowlink['@ENDARROW'] = 'Default';
 					} else if (arr.type=='target-to-source') {
-						arrow.ARROWLINK['@STARTARROW'] = 'Default';
-						arrow.ARROWLINK['@ENDARROW'] = 'None';
+						arrow.arrowlink['@STARTARROW'] = 'Default';
+						arrow.arrowlink['@ENDARROW'] = 'None';
 					} else {
-						arrow.ARROWLINK['@STARTARROW'] = 'Default';
-						arrow.ARROWLINK['@ENDARROW'] = 'Default';
+						arrow.arrowlink['@STARTARROW'] = 'Default';
+						arrow.arrowlink['@ENDARROW'] = 'Default';
 					}
-					obj.NODE['#'].push(arrow);
+					obj.node['#'].push(arrow);
 				}
 			}
 			//process children nodes
 			if (node_obj.nodes.length>0) {
 				for (let xc of node_obj.nodes) {
-					if (!obj.NODE['#']) obj.NODE['#'] = [];
-					obj.NODE['#'].push(nodeToObj(xc));
+					if (!obj.node['#']) obj.node['#'] = [];
+					obj.node['#'].push(nodeToObj(xc));
 				}
 			}
 			//
