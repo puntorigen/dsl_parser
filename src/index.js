@@ -241,7 +241,7 @@ export default class dsl_parser {
 		//to do idea: secret icon nodes -> encrypted json with 'secrets' config node within _git.dsl version (cli arg --secret 'pass' y --un_git (crea ver no git con secrets desencriptado))
 		//grab parentID
 		let parent = await this.$('node[ID='+parent_id+']').each(async function(i,elem) {
-			let cur = me.$(elem);
+			let cur = this.$(elem);
 			let txml = await this.nodeToXML(node);
 			cur.append(txml);
 		});
