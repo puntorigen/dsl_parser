@@ -734,10 +734,11 @@ export default class dsl_parser {
 
 	/**
 	* Returns a modified version of the current loaded DSL, ready to be push to a version control (like github)
+	* @param 	{Boolean}	[remove] 		- Remove modified dates? (default:true)
 	* @param 	{Function}	[extrastep] 	- Optional method to return make additional cleansing and return the xml
 	* @return 	{String} 					  Modified DSL source ready to be saved and pushed to a version control
 	*/
-	async createGitVersion(extrastep) {
+	async createGitVersion(remove=true,extrastep) {
 		// 1) get copy of current DSL content into memory (for restoring after returning)
 		let copy = this.$.html(), me = this;
 		// 2) get all nodes
@@ -746,8 +747,10 @@ export default class dsl_parser {
 		nodes.each(function(i,elem) {
 			// 3) replace all attributes CREATED with fixed value
 			me.$(elem).attr("CREATED", "1552681669876");
-			// 4) replace all attributes MODIFIED with fixed value
-			me.$(elem).attr("MODIFIED", "1552681669876");
+			if (remove==true) {
+				// 4) replace all attributes MODIFIED with fixed value
+				me.$(elem).attr("MODIFIED", "1552681669876");
+			}
 			// 5) erase all attributes VSHIFT and HGAP
 			me.$(elem).removeAttr("VSHIFT");
 			// 6) erase all attributes HGAP

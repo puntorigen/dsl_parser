@@ -17,7 +17,7 @@ dsl_parser: A class for parsing Concepto DSL files, and compile them with the OP
         * [.getParentNodesIDs(id, [array])](#module_dsl_parser+getParentNodesIDs) ⇒ <code>String</code> \| <code>Array</code>
         * [.getChildrenNodesIDs(id, [array])](#module_dsl_parser+getChildrenNodesIDs) ⇒ <code>String</code> \| <code>Array</code>
         * [.getBrotherNodesIDs(id, [before], [after], [array])](#module_dsl_parser+getBrotherNodesIDs) ⇒ <code>String</code>
-        * [.createGitVersion([extrastep])](#module_dsl_parser+createGitVersion) ⇒ <code>String</code>
+        * [.createGitVersion([remove], [extrastep])](#module_dsl_parser+createGitVersion) ⇒ <code>String</code>
         * [.findVariables(text, [symbol], [symbol_closing], [array])](#module_dsl_parser+findVariables) ⇒ <code>String</code>
         * [.replaceVarsSymbol(text, from, to)](#module_dsl_parser+replaceVarsSymbol) ⇒ <code>String</code>
     * _inner_
@@ -144,15 +144,16 @@ Returns the brother nodes ids of the given node id
 
 <a name="module_dsl_parser+createGitVersion"></a>
 
-### dsl_parser.createGitVersion([extrastep]) ⇒ <code>String</code>
+### dsl_parser.createGitVersion([remove], [extrastep]) ⇒ <code>String</code>
 Returns a modified version of the current loaded DSL, ready to be push to a version control (like github)
 
 **Kind**: instance method of [<code>dsl\_parser</code>](#module_dsl_parser)  
 **Returns**: <code>String</code> - Modified DSL source ready to be saved and pushed to a version control  
 
-| Param | Type | Description |
-| --- | --- | --- |
-| [extrastep] | <code>function</code> | Optional method to return make additional cleansing and return the xml |
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| [remove] | <code>Boolean</code> | <code>true</code> | Remove modified dates? (default:true) |
+| [extrastep] | <code>function</code> |  | Optional method to return make additional cleansing and return the xml |
 
 <a name="module_dsl_parser+findVariables"></a>
 
