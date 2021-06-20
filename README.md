@@ -11,6 +11,7 @@ dsl_parser: A class for parsing Concepto DSL files, and compile them with the OP
         * [.getParser()](#module_dsl_parser+getParser) ⇒ <code>Object</code>
         * [.getNodes([text], [attribute], [attribute_value], [icon], [level], [link], [recurse], [nodes_raw])](#module_dsl_parser+getNodes) ⇒ <code>Array.&lt;NodeDSL&gt;</code>
         * [.addNode(parent_id, node)](#module_dsl_parser+addNode)
+        * [.editNode(node_id, data)](#module_dsl_parser+editNode)
         * [.nodeToXML(node)](#module_dsl_parser+nodeToXML)
         * [.getNode(id, [recurse], [dates], [$], [nodes_raw])](#module_dsl_parser+getNode) ⇒ <code>Array.&lt;NodeDSL&gt;</code>
         * [.getParentNode(id, [recurse])](#module_dsl_parser+getParentNode) ⇒ <code>NodeDSL</code>
@@ -20,6 +21,7 @@ dsl_parser: A class for parsing Concepto DSL files, and compile them with the OP
         * [.createGitVersion([remove], [extrastep])](#module_dsl_parser+createGitVersion) ⇒ <code>String</code>
         * [.findVariables(text, [symbol], [symbol_closing], [array])](#module_dsl_parser+findVariables) ⇒ <code>String</code>
         * [.replaceVarsSymbol(text, from, to)](#module_dsl_parser+replaceVarsSymbol) ⇒ <code>String</code>
+        * [.getDifferences()](#module_dsl_parser+getDifferences)
     * _inner_
         * [~NodeDSL](#module_dsl_parser..NodeDSL) : <code>Object</code>
         * [~Arrow](#module_dsl_parser..Arrow) : <code>Object</code>
@@ -65,6 +67,18 @@ Adds a node as an xml child of the given parent node ID
 | --- | --- | --- |
 | parent_id | <code>String</code> | ID of parent node |
 | node | <code>NodeDSL</code> | NodeDSL object to add |
+
+<a name="module_dsl_parser+editNode"></a>
+
+### dsl_parser.editNode(node_id, data)
+Edits the given node ID data keys
+
+**Kind**: instance method of [<code>dsl\_parser</code>](#module_dsl_parser)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| node_id | <code>String</code> | ID of node to edit |
+| data | <code>NodeDSL</code> | NodeDSL object properties to modify or method(existing_properties_of_node) that returns object data to modify |
 
 <a name="module_dsl_parser+nodeToXML"></a>
 
@@ -182,6 +196,13 @@ Finds and transform variables wrapping/handlebars symbols given a 'from' symbol 
 | from | <code>Object</code> | Object to identify source variables symbols (keys: open and close) |
 | to | <code>Object</code> | Object to identify target variables symbols (keys: open and close) |
 
+<a name="module_dsl_parser+getDifferences"></a>
+
+### dsl_parser.getDifferences()
+Finds all differences 'from' given dsl 'to' given dsl (for CLI arg --diff-from file.dsl)
+and returns an object with 'deleted', 'added', and 'modified' IDs keys
+
+**Kind**: instance method of [<code>dsl\_parser</code>](#module_dsl_parser)  
 <a name="module_dsl_parser..NodeDSL"></a>
 
 ### dsl_parser~NodeDSL : <code>Object</code>

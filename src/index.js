@@ -250,6 +250,32 @@ export default class dsl_parser {
 	}
 
 	/**
+	 * Edits the given node ID data keys
+	 * @param 	{String}	node_id 		- ID of node to edit
+	 * @param	{NodeDSL}	data			- NodeDSL object properties to modify or method(existing_properties_of_node) that returns object data to modify
+	 */
+	 async editNode({ node_id=this.throwIfMissing('node_id - editNode'), data=this.throwIfMissing('data - editNode') }={}) {
+		//grab nodetID
+		let me = this;
+		let key_node = await this.getNode({ id:node_id, recurse:true });
+		//overwrite node data with given data, and get the new xml
+		let ndata = key_node, new_xml = '';
+		if (typeof data === 'function') {
+			let tmp = await data(key_node);
+			ndata = {...ndata,...tmp};
+		} else {
+			ndata = {...ndata,...data};
+		}
+		new_xml = await this.nodeToXML({ node:ndata }); 
+		let target = await this.$('node[ID='+node_id+']').toArray();
+		if (target.length>0) {
+			let target_node = this.$(target[0]);
+			target_node.replaceWith(new_xml);
+		}
+		return me.$.html();
+	}
+
+	/**
 	 * Converts a NodeDSL into an XML of ConceptoDSL node child
 	 * @param	{NodeDSL}	node			- NodeDSL origin object
 	 */
@@ -819,6 +845,111 @@ export default class dsl_parser {
     		resp = resp.replace(tmp.from,tmp.to);
     	}
     	return resp;
+	}
+
+	/** 
+	* Finds all differences 'from' given dsl 'to' given dsl (for CLI arg --diff-from file.dsl)
+	* and returns an object with 'deleted', 'added', and 'modified' IDs keys
+	*/
+	async getDifferences(from,to) {
+		let changes = async function(source,target) {
+			let prettydiff = require('prettydiff');
+			let extract = require('extractjs')();
+			let report={ deleted:{}, added:{}, modified:{} };
+			//console.log(prettydiff);
+			let opts = {
+				source: source,
+				diff: target
+			};
+			prettydiff.options.source = opts.source;
+			prettydiff.options.diff = opts.diff;
+			prettydiff.options.diff_format = 'json';
+			let tdiff = prettydiff();
+			let resp = JSON.parse(tdiff).diff;
+			let resp_bak = JSON.parse(tdiff).diff;
+			// build report
+			for (let line in resp) {
+				let content = resp[line];
+				let operator = content.shift();
+				//console.log('operador:'+operator);
+				if (true) { //operator!='r'
+					let related_id = -1;
+					let test = extract(`id="ID_{id}"`,content[0]);
+					if (test.id) {
+						related_id = `ID_${test.id}`;
+						if (operator=='+') {
+							report.added[related_id]=line;
+						} else if (operator=='r') {
+							//node modified
+							report.modified[related_id]=line;
+						}
+					} else {
+						//search parents for id if line doesn't contain it
+						//console.log('ID no encontrado en linea agregada,revisando previos con operator tipo =');
+						for (let i = line; i>=0; i--) {
+							let ope = resp_bak[i][0];
+							if (true) { //'=,+,r,-'.split(',').includes(ope)
+								let to_check = resp_bak[i];
+								if (typeof to_check == 'string') {
+									to_check = to_check.trim();
+									//console.log('(string) getting code from '+to_check);
+								} else if (Array.isArray(to_check)) {
+									//console.log('to_check.length = '+to_check.length);
+									if (to_check.length==3) {
+										//when ope is r=replace
+										to_check = to_check[2].trim();
+									} else {
+										to_check = to_check[1].trim();
+									}
+								}
+								if (to_check!='' && to_check.includes('ID_')==true) {                        
+									let test = extract(`id="ID_{id}"`,to_check);
+									//console.log('checking for ID',{to_check,test});
+									if (test.id) {
+										related_id = `ID_${test.id}`;
+										if (operator=='+') {
+											report.added[related_id]=line;
+										} else if (operator=='-') {
+											report.deleted[related_id]=line;
+										} else if (operator=='r') {
+											report.modified[related_id]=line;
+										}
+										break;
+									}
+								}
+							}
+						}
+					} 
+				}
+			}
+			//filter; remove IDs from modified that also appear on added
+			for (let x in report.added) {
+				delete report.modified[x];
+			}
+			//filter2: remove IDs from added if they also appear on deleted
+			for (let x in report.deleted) {
+				if (opts.source.includes(x)==false && opts.diff.includes(x)==true) {
+					report.added[x];
+					delete report.deleted[x];
+				} else {
+					delete report.added[x];
+				}
+			}
+			for (let x in report.modified) {
+				if (opts.diff.includes(x)==false) {
+					//filter3: remove IDs from modified that dont exist in 'to' source, to 'deleted'
+					report.deleted[x]=report.modified[x];
+					delete report.modified[x];
+				} else if (opts.source.includes(x)==false) {
+				//filter3: remove IDs from modified that dont exist in 'source' source, to 'added'
+				report.added[x]=report.modified[x];
+				delete report.modified[x];
+				}
+			}
+			return report;
+		};
+		let resp = await changes(from,to);
+		return resp;
 	}
 
 }
