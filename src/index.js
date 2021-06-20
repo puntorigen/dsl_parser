@@ -850,6 +850,8 @@ export default class dsl_parser {
 	/** 
 	* Finds all differences 'from' given dsl 'to' given dsl (for CLI arg --diff-from file.dsl)
 	* and returns an object with 'deleted', 'added', and 'modified' IDs keys
+	* @param 	{String}	from 				- From source DSL content (before code)
+	* @param 	{String}	to 					- To source DSL content (after code, to compare)
 	*/
 	async getDifferences(from,to) {
 		let changes = async function(source,target) {
@@ -878,10 +880,10 @@ export default class dsl_parser {
 					if (test.id) {
 						related_id = `ID_${test.id}`;
 						if (operator=='+') {
-							report.added[related_id]=line;
+							report.added[related_id]=resp[line]; //line
 						} else if (operator=='r') {
 							//node modified
-							report.modified[related_id]=line;
+							report.modified[related_id]=resp[line];
 						}
 					} else {
 						//search parents for id if line doesn't contain it
@@ -908,11 +910,11 @@ export default class dsl_parser {
 									if (test.id) {
 										related_id = `ID_${test.id}`;
 										if (operator=='+') {
-											report.added[related_id]=line;
+											report.added[related_id]=resp[line];
 										} else if (operator=='-') {
-											report.deleted[related_id]=line;
+											report.deleted[related_id]=resp[line];
 										} else if (operator=='r') {
-											report.modified[related_id]=line;
+											report.modified[related_id]=resp[line]; //line
 										}
 										break;
 									}

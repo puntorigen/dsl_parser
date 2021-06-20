@@ -21,7 +21,7 @@ dsl_parser: A class for parsing Concepto DSL files, and compile them with the OP
         * [.createGitVersion([remove], [extrastep])](#module_dsl_parser+createGitVersion) ⇒ <code>String</code>
         * [.findVariables(text, [symbol], [symbol_closing], [array])](#module_dsl_parser+findVariables) ⇒ <code>String</code>
         * [.replaceVarsSymbol(text, from, to)](#module_dsl_parser+replaceVarsSymbol) ⇒ <code>String</code>
-        * [.getDifferences()](#module_dsl_parser+getDifferences)
+        * [.getDifferences(from, to)](#module_dsl_parser+getDifferences)
     * _inner_
         * [~NodeDSL](#module_dsl_parser..NodeDSL) : <code>Object</code>
         * [~Arrow](#module_dsl_parser..Arrow) : <code>Object</code>
@@ -198,11 +198,17 @@ Finds and transform variables wrapping/handlebars symbols given a 'from' symbol 
 
 <a name="module_dsl_parser+getDifferences"></a>
 
-### dsl_parser.getDifferences()
+### dsl_parser.getDifferences(from, to)
 Finds all differences 'from' given dsl 'to' given dsl (for CLI arg --diff-from file.dsl)
 and returns an object with 'deleted', 'added', and 'modified' IDs keys
 
 **Kind**: instance method of [<code>dsl\_parser</code>](#module_dsl_parser)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| from | <code>String</code> | From source DSL content (before code) |
+| to | <code>String</code> | To source DSL content (after code, to compare) |
+
 <a name="module_dsl_parser..NodeDSL"></a>
 
 ### dsl_parser~NodeDSL : <code>Object</code>
