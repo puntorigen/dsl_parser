@@ -330,6 +330,22 @@ export default class dsl_parser {
 			if (node_obj.bgcolor!='') obj.node['@BACKGROUND_COLOR'] = node_obj.bgcolor;
 			if (node_obj.style!='') obj.node['@STYLE'] = node_obj.style;
 			if (node_obj.text!='') obj.node['@TEXT'] = node_obj.text;
+			//<attribute_layout NAME_WIDTH="230" VALUE_WIDTH="301"/>
+			//determine attributes auto-width
+			let attr_max_namelen=0, attr_max_valuelen=0;
+			for (let att in node_obj.attributes) {
+				if (att.length>attr_max_namelen) attr_max_namelen=att.length;
+				if (node_obj.attributes[att].length>attr_max_valuelen) attr_max_valuelen=node_obj.attributes[att].length;
+			}
+			if (attr_max_namelen>0 && attr_max_valuelen>0) {
+				if (!obj.node['#']) obj.node['#'] = [];
+				obj.node['#'].push({
+					attribute_layout: {
+						'@NAME_WIDTH': Math.round(attr_max_namelen*6.67),
+						'@VALUE_WIDTH': Math.round(attr_max_valuelen*6.67)
+					}
+				});
+			}
 			//attributes
 			for (let att in node_obj.attributes) {
 				if (!obj.node['#']) obj.node['#'] = [];
@@ -339,6 +355,8 @@ export default class dsl_parser {
 						'@VALUE': node_obj.attributes[att]
 					}
 				});
+				if (att.length>attr_max_namelen) attr_max_namelen=att.length;
+				if (node_obj.attributes[att].length>attr_max_valuelen) attr_max_valuelen=node_obj.attributes[att].length;
 			}
 			//icons
 			for (let icon of node_obj.icons) {
@@ -350,7 +368,7 @@ export default class dsl_parser {
 				});
 			}
 			//fonts
-			if (node_obj.font!=base.font) {
+			if (JSON.stringify(node_obj.font)!=JSON.stringify(base.font)) {
 				if (!obj.node['#']) obj.node['#'] = [];
 				let font_obj={
 					font: {
