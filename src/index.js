@@ -944,7 +944,14 @@ export default class dsl_parser {
 			}
 			//filter; remove IDs from modified that also appear on added
 			for (let x in report.added) {
-				delete report.modified[x];
+				//21jun21
+				if (opts.diff.includes(x)==true) {
+					//if new file include the given ID, they it was modified (ex. an html note tag)
+					report.modified[x]=report.added[x];
+					delete report.added[x];
+				} else {
+					delete report.modified[x];
+				}
 			}
 			//filter2: remove IDs from added if they also appear on deleted
 			for (let x in report.deleted) {
