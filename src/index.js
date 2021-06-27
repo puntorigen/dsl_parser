@@ -254,10 +254,11 @@ export default class dsl_parser {
 	 * @param 	{String}	node_id 		- ID of node to edit
 	 * @param	{NodeDSL}	data			- NodeDSL object properties to modify or method(existing_properties_of_node) that returns object data to modify
 	 */
-	 async editNode({ node_id=this.throwIfMissing('node_id - editNode'), data=this.throwIfMissing('data - editNode') }={}) {
+	 async editNode({ node_id=this.throwIfMissing('node_id - editNode'), data=this.throwIfMissing('data - editNode'), children=true }={}) {
 		//grab nodetID
 		let me = this;
-		let key_node = await this.getNode({ id:node_id, recurse:true });
+		this.debug.outT({ message:`editNode: getting nodeID:${node_id}` });
+		let key_node = await this.getNode({ id:node_id, recurse:children });
 		//overwrite node data with given data, and get the new xml
 		let ndata = key_node, new_xml = '';
 		if (typeof data === 'function') {
@@ -266,12 +267,15 @@ export default class dsl_parser {
 		} else {
 			ndata = {...ndata,...data};
 		}
+		this.debug.outT({ message:`editNode: converting data to xml` });
 		new_xml = await this.nodeToXML({ node:ndata }); 
+		this.debug.outT({ message:`editNode: replacing xml` });
 		let target = await this.$('node[ID='+node_id+']').toArray();
 		if (target.length>0) {
 			let target_node = this.$(target[0]);
 			target_node.replaceWith(new_xml);
 		}
+		this.debug.outT({ message:`editNode: ready!` });
 		return me.$.html();
 	}
 
@@ -872,7 +876,9 @@ export default class dsl_parser {
 	* @param 	{String}	to 					- To source DSL content (after code, to compare)
 	*/
 	async getDifferences(from,to) {
+		this.debug.outT({ message:'getDifferences: init' });
 		let changes = async function(source,target) {
+			this.debug.outT({ message:'getDifferences: changes init' });
 			let prettydiff = require('prettydiff');
 			let extract = require('extractjs')();
 			let report={ deleted:{}, added:{}, modified:{} };
@@ -884,17 +890,25 @@ export default class dsl_parser {
 			prettydiff.options.source = opts.source;
 			prettydiff.options.diff = opts.diff;
 			prettydiff.options.diff_format = 'json';
+			this.debug.outT({ message:`getDifferences: calling prettydiff`});
 			let tdiff = prettydiff();
+			this.debug.outT({ message:`getDifferences: parsing diff as resp`});
 			let resp = JSON.parse(tdiff).diff;
+			this.debug.outT({ message:`getDifferences: parsing diff as resp_bak`});
 			let resp_bak = JSON.parse(tdiff).diff;
 			// build report
+			this.debug.outT({ message:`getDifferences: building report` });
+			let counter_ = 0;
 			for (let line in resp) {
+				if ((counter_%1000)==0) this.debug.outT({ message:`getDifferences: reading 1000 lines from line ${line} (of ${resp.length})` });
+				counter_ += 1;
 				let content = resp[line];
 				let operator = content.shift();
-				//console.log('operador:'+operator);
-				if (true) { //operator!='r'
+				if (true) { //operator!='=' //true //operator!='r'
+					//console.log('operador:'+operator);
 					let related_id = -1;
 					let test = extract(`id="ID_{id}"`,content[0]);
+					if (!test.id) test = extract(`ID="ID_{id}"`,content[0]);
 					if (test.id) {
 						related_id = `ID_${test.id}`;
 						if (operator=='+') {
@@ -905,7 +919,7 @@ export default class dsl_parser {
 						}
 					} else {
 						//search parents for id if line doesn't contain it
-						//console.log('ID no encontrado en linea agregada,revisando previos con operator tipo =');
+						//console.log('ID no encontrado en linea analizada '+content[0]+',revisando previos con operator tipo =');
 						for (let i = line; i>=0; i--) {
 							let ope = resp_bak[i][0];
 							if (true) { //'=,+,r,-'.split(',').includes(ope)
@@ -924,6 +938,7 @@ export default class dsl_parser {
 								}
 								if (to_check!='' && to_check.includes('ID_')==true) {                        
 									let test = extract(`id="ID_{id}"`,to_check);
+									if (!test.id) test = extract(`ID="ID_{id}"`,to_check);
 									//console.log('checking for ID',{to_check,test});
 									if (test.id) {
 										related_id = `ID_${test.id}`;
@@ -942,12 +957,13 @@ export default class dsl_parser {
 					} 
 				}
 			}
+			this.debug.outT({ message:`getDifferences: applying post-filters` });
 			//filter; remove IDs from modified that also appear on added
 			for (let x in report.added) {
 				//21jun21
 				if (opts.diff.includes(x)==true) {
-					//if new file include the given ID, they it was modified (ex. an html note tag)
-					report.modified[x]=report.added[x];
+					//if new file include the given ID and the old file, they it was modified (ex. an html note tag)
+					if (report.added[x].length==2) report.modified[x]=report.added[x];
 					delete report.added[x];
 				} else {
 					delete report.modified[x];
@@ -956,25 +972,49 @@ export default class dsl_parser {
 			//filter2: remove IDs from added if they also appear on deleted
 			for (let x in report.deleted) {
 				if (opts.source.includes(x)==false && opts.diff.includes(x)==true) {
-					report.added[x];
-					delete report.deleted[x];
+					//24jun the id is on the old file and not on the new.. (seems a real deleted node)
+					//report.added[x];
+					//delete report.deleted[x];
 				} else {
-					delete report.added[x];
+					if (x in report.added) {
+						// if key is in added as well as deleted, then its a modified node
+						delete report.added[x];
+						report.modified[x]=report.deleted[x];
+						delete report.deleted[x];
+					}
 				}
 			}
 			for (let x in report.modified) {
-				if (opts.diff.includes(x)==false) {
+				if (opts.diff.includes(x)==false && opts.source.includes(x)==true) {
 					//filter3: remove IDs from modified that dont exist in 'to' source, to 'deleted'
 					report.deleted[x]=report.modified[x];
 					delete report.modified[x];
 				} else if (opts.source.includes(x)==false) {
-				//filter3: remove IDs from modified that dont exist in 'source' source, to 'added'
-				report.added[x]=report.modified[x];
-				delete report.modified[x];
+					//filter3: remove IDs from modified that dont exist in 'source' source, to 'added'
+					report.added[x]=report.modified[x];
+					delete report.modified[x];
+				} else if (x in report.deleted) {
+					delete report.deleted[x];
+				}
+				//only keep modified values that are of same node type
+				if (report.modified[x] && report.modified[x].length==2) {
+					this.debug.outT({ message:`getDifferences: testing modified false positives` });
+					let from = extract(`&lt;{tag} `,report.modified[x][0]);
+					let after = extract(`&lt;{tag} `,report.modified[x][1]);
+					//let after = extract(`&lt;/{tag}&`,report.modified[x][1]);
+					//if (!after.tag) after = extract(`&lt;/{tag} `,report.modified[x][1]);
+					if (from.tag!=after.tag) {
+						this.debug.outT({ message:`getDifferences: removing: from '${from.tag}' to '${after.tag}'` });
+						delete report.modified[x];
+					}
+				} else {
+					this.debug.outT({ message:`getDifferences: cleaning modified false positive` });
+					delete report.modified[x];
 				}
 			}
+			this.debug.outT({ message:`getDifferences: finished processing` });
 			return report;
-		};
+		}.bind(this);
 		let resp = await changes(from,to);
 		return resp;
 	}
