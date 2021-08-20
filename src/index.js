@@ -105,7 +105,7 @@ export default class dsl_parser {
 			// parse XML 
 			this.$ = cheerio.load(data, { ignoreWhitespace: false, xmlMode:true, decodeEntities:false });
 			// remove cancelled nodes if requested
-			if (!this.config.cancelled) {
+			if (this.config.cancelled==false) {
 				this.debug.outT({ message:'removing cancelled nodes from tree' });
 				//if (this.config.debug) console.log('removing cancelled nodes from tree');
 				this.$('icon[BUILTIN*=button_cancel]').parent().remove();
