@@ -49,7 +49,7 @@ export default class dsl_parser {
 	constructor({ file=this.throwIfMissing('file'), config={} }={}) {
 		let console_ = require('open_console');
 		let def_config = {
-			cancelled:false,
+			cancelled:true,
 			debug:true
 		};
 		this.file = file;
@@ -105,10 +105,14 @@ export default class dsl_parser {
 			// parse XML 
 			this.$ = cheerio.load(data, { ignoreWhitespace: false, xmlMode:true, decodeEntities:false });
 			// remove cancelled nodes if requested
-			if (this.config.cancelled==false) {
+			if (this.config.cancelled && this.config.cancelled==false) {
 				this.debug.outT({ message:'removing cancelled nodes from tree' });
 				//if (this.config.debug) console.log('removing cancelled nodes from tree');
-				this.$('icon[BUILTIN*=button_cancel]').parent().remove();
+				try {
+					//this assumes there is at least one cancelled node; so using try/catch for not testing
+					this.$('icon[BUILTIN*=button_cancel]').parent().remove();
+				} catch(eeec) {
+				}
 			}
 			this.debug.timeEnd({ id:'process' });
 			//if (this.config.debug) console.timeEnd('process');
