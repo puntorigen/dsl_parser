@@ -1,4 +1,6 @@
-# Punto Origen OPEN Framework : ES6 Classes
+![dsl_parser](https://user-images.githubusercontent.com/57605485/133171784-3adfce56-5dc6-4a0d-b108-cae047b4d284.png)
+
+ES6 Framework class for parsing Concepto DSL visual programming files.
 <sup>Note: you need to pass all arguments as an Object with keys.</sup>
 
 # API Reference
@@ -262,5 +264,4 @@ Arrow object definition, for connections to other nodes within a DSL.
 
 * * *
 
-&copy; 2020 Pablo Schaffner &lt;pablo@puntorigen.com&gt;.
-Documented by [jsdoc-to-markdown](https://github.com/jsdoc2md/jsdoc-to-markdown).
+&copy; 2020-2021 Pablo Schaffner &lt;pablo@puntorigen.com&gt;.
