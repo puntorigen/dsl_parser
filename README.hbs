@@ -2,7 +2,7 @@
 
 &nbsp;&nbsp;&nbsp;![lines](https://img.shields.io/tokei/lines/github/puntorigen4u/dsl_parser)
 
-ES6 Framework class for parsing Concepto DSL visual programming files
+ES6 Framework class for parsing Concepto DSL visual programming files<br/>
 Note you need to pass all arguments as an <i>object with keys</i>.
 
 # API Reference
