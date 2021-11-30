@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "dsl_parser",
-  "version": "1.5.6",
+  "version": "1.5.61",
   "description": "Punto Origen OPEN - ES6 DSL Parser Class",
   "keywords": [
     "creador",
