@@ -47,7 +47,7 @@ import helper from './helper'
 export default class dsl_parser {
 
 	constructor({ file=this.throwIfMissing('file'), config={} }={}) {
-		let console_ = require('open_console');
+		let console_ = require('@concepto/console');
 		let def_config = {
 			cancelled:true,
 			debug:true
