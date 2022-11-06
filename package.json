@@ -1,6 +1,6 @@
 {
   "name": "@concepto/dsl_parser",
-  "version": "1.5.62",
+  "version": "1.5.63",
   "description": "Concepto DSL - visually create and maintain modern node.js based apps (@dsl_parser)",
   "keywords": [
     "creador",

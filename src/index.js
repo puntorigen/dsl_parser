@@ -46,13 +46,15 @@ import helper from './helper'
 
 export default class dsl_parser {
 
-	constructor({ file=this.throwIfMissing('file'), config={} }={}) {
+	constructor({ file, source, config={} }={}) {
+		if (!file && !source) this.throwIfMissing('file/source');
 		let console_ = require('@concepto/console');
 		let def_config = {
 			cancelled:true,
 			debug:true
 		};
-		this.file = file;
+		if (file) this.file = file;
+		if (source) this.source = source;
 		this.config = {...def_config,...config};
 		this.help = new helper();
 		this.debug = new console_({ silent:!this.config.debug });
@@ -98,15 +100,16 @@ export default class dsl_parser {
 	* Executes initial processing for parser
 	*/
 	async process() {
-		if (this.file!='') {
+		if ((this.file && this.file!='') || (this.source && this.source!='')) {
 			this.debug.setPrefix({ prefix:'dsl_parser', color:'yellow' });
-			this.debug.title({ title:'DSL Parser for '+this.file, color:'green' });
+			if (this.file) this.debug.title({ title:'DSL Parser for '+this.file, color:'green' });
 			this.debug.time({ id:'process' });
 			//if (this.config.debug) console.time('process');
 			let cheerio = require('cheerio'), path = require('path');
 			let fs = require('fs').promises;
 			let fileExists = false, data='';
-			data = await fs.readFile(this.file,'utf-8');
+			if (this.file) data = await fs.readFile(this.file,'utf-8');
+			if (this.source && this.source!='') data = this.source;
 			// fix accents -> unicode to latin chars
 			this.debug.outT({ message:'fixing accents' });
 			//if (this.config.debug) console.log('fixing accents');
